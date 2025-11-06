@@ -1,9 +1,12 @@
-import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Bell, Plus, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Bell, Plus, Moon, Sun, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/components/ThemeProvider";
+import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
 import { useState } from "react";
@@ -27,6 +30,13 @@ const navItems = [
 export default function Navigation() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { theme, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
+  const { organization, membership } = useOrganization();
+
+  const getUserInitials = () => {
+    if (!user?.email) return '?';
+    return user.email[0].toUpperCase();
+  };
 
   return (
     <>
@@ -57,6 +67,11 @@ export default function Navigation() {
         </div>
 
         <div className="flex items-center gap-2">
+          {organization && (
+            <span className="text-sm text-muted-foreground hidden lg:block">
+              {organization.name}
+            </span>
+          )}
           <Button variant="default" size="sm" className="gap-2 bg-accent hover:bg-accent/90">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Quick Add</span>
@@ -75,11 +90,39 @@ export default function Navigation() {
               8
             </Badge>
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <div className="h-8 w-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-semibold">
-              JD
-            </div>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <div className="h-8 w-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-semibold">
+                  {getUserInitials()}
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div>
+                  <p className="font-medium">{user?.email}</p>
+                  {membership && (
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {membership.role.replace(/_/g, ' ')}
+                    </p>
+                  )}
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/settings" className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Organization Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -107,10 +150,13 @@ export default function Navigation() {
           ))}
 
           <div className="mt-auto pt-4 border-t border-sidebar-border">
-            <button className="flex items-center gap-3 px-4 py-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors w-full">
+            <Link
+              to="/settings"
+              className="flex items-center gap-3 px-4 py-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
               <Settings className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Settings</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>

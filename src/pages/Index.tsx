@@ -4,7 +4,9 @@ import ProjectCard from "@/components/ProjectCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "react-router-dom";
+import { useOrganization } from "@/hooks/useOrganization";
 import {
   Droplet,
   Flame,
@@ -17,14 +19,27 @@ import {
   Wrench,
   DollarSign,
   Sparkles,
+  Info,
 } from "lucide-react";
 
 export default function Index() {
+  const { organization, membership } = useOrganization();
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
       <main className="lg:ml-64 mt-16 p-6">
+        {/* Welcome Alert */}
+        {organization && (
+          <Alert className="mb-6 border-accent/50 bg-accent/5">
+            <Info className="h-4 w-4 text-accent" />
+            <AlertDescription>
+              Welcome to <strong>{organization.name}</strong>! You're logged in as{' '}
+              <strong className="capitalize">{membership?.role.replace(/_/g, ' ')}</strong>.
+            </AlertDescription>
+          </Alert>
+        )}
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">

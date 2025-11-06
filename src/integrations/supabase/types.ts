@@ -77,6 +77,128 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          id: string
+          invited_at: string | null
+          invited_by: string | null
+          is_active: boolean | null
+          joined_at: string | null
+          organization_id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          is_active?: boolean | null
+          joined_at?: string | null
+          organization_id: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          is_active?: boolean | null
+          joined_at?: string | null
+          organization_id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          address: string | null
+          cost_codes: Json | null
+          created_at: string | null
+          default_project_templates: Json | null
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          phone: string | null
+          settings: Json | null
+          time_zone: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          cost_codes?: Json | null
+          created_at?: string | null
+          default_project_templates?: Json | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          settings?: Json | null
+          time_zone?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          cost_codes?: Json | null
+          created_at?: string | null
+          default_project_templates?: Json | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          settings?: Json | null
+          time_zone?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -93,6 +215,23 @@ export type Database = {
         | "reconstruction"
         | "contents"
         | "closeout"
+      user_role:
+        | "owner"
+        | "admin"
+        | "executive"
+        | "pm"
+        | "estimator"
+        | "insurance_coordinator"
+        | "mitigation_lead"
+        | "mitigation_tech"
+        | "reconstruction_lead"
+        | "contents_lead"
+        | "coordinator"
+        | "finance"
+        | "equipment_manager"
+        | "subcontractor"
+        | "homeowner"
+        | "adjuster"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -228,6 +367,24 @@ export const Constants = {
         "reconstruction",
         "contents",
         "closeout",
+      ],
+      user_role: [
+        "owner",
+        "admin",
+        "executive",
+        "pm",
+        "estimator",
+        "insurance_coordinator",
+        "mitigation_lead",
+        "mitigation_tech",
+        "reconstruction_lead",
+        "contents_lead",
+        "coordinator",
+        "finance",
+        "equipment_manager",
+        "subcontractor",
+        "homeowner",
+        "adjuster",
       ],
     },
   },
