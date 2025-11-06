@@ -3,13 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, File, Image, FileText, Download, Trash2 } from 'lucide-react';
+import { Upload, File, Image, FileText, Download, Trash2, ArrowLeftRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { BatchPhotoUploader } from '@/components/photos/BatchPhotoUploader';
+import { PhotoAlbums } from '@/components/photos/PhotoAlbums';
+import { BeforeAfterSlider } from '@/components/photos/BeforeAfterSlider';
+import { useQuery } from '@tanstack/react-query';
 
 interface ProjectDocumentsProps {
   projectId: string;
@@ -30,7 +33,57 @@ type Document = {
 export default function ProjectDocuments({ projectId }: ProjectDocumentsProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showBeforeAfter, setShowBeforeAfter] = useState(false);
   const { toast } = useToast();
+
+  // Fetch photos with real-time updates
+  const { data: photos = [], refetch: refetchPhotos } = useQuery({
+    queryKey: ['project-photos', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('project_photos' as any)
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data as any) || [];
+    },
+  });
+
+  // Set up real-time subscription for photos
+  useEffect(() => {
+    const channel = supabase
+      .channel('project-photos-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'project_photos',
+          filter: `project_id=eq.${projectId}`,
+        },
+        (payload) => {
+          console.log('Photo change detected:', payload);
+          refetchPhotos();
+          
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: 'New Photo Added',
+              description: 'A team member uploaded a new photo',
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [projectId, refetchPhotos]);
+
+  const beforePhotos = photos.filter((p: any) => p.is_before_photo);
+  const afterPhotos = photos.filter((p: any) => p.is_after_photo);
 
   const fetchDocuments = async () => {
     try {
@@ -108,19 +161,44 @@ export default function ProjectDocuments({ projectId }: ProjectDocumentsProps) {
   };
 
   return (
-    <Tabs defaultValue="photos" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="photos">Photos</TabsTrigger>
-        <TabsTrigger value="documents">Documents</TabsTrigger>
-      </TabsList>
+    <>
+      <Tabs defaultValue="gallery" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="gallery">Gallery</TabsTrigger>
+          <TabsTrigger value="albums">Smart Albums</TabsTrigger>
+          <TabsTrigger value="upload">Upload</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="photos" className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          <PhotoUploader projectId={projectId} onUploadComplete={fetchDocuments} />
-          <BatchPhotoUploader projectId={projectId} onUploadComplete={fetchDocuments} />
-        </div>
-        <PhotoGallery projectId={projectId} />
-      </TabsContent>
+        <TabsContent value="gallery" className="space-y-4">
+          {beforePhotos.length > 0 && afterPhotos.length > 0 && (
+            <Button
+              onClick={() => setShowBeforeAfter(true)}
+              className="w-full md:w-auto"
+            >
+              <ArrowLeftRight className="h-4 w-4 mr-2" />
+              Compare Before/After Photos
+            </Button>
+          )}
+          <PhotoGallery projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="albums">
+          <PhotoAlbums
+            photos={photos}
+            onPhotoClick={(photo) => {
+              // Could open photo in modal
+              console.log('Photo clicked:', photo);
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="upload" className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <PhotoUploader projectId={projectId} onUploadComplete={() => refetchPhotos()} />
+            <BatchPhotoUploader projectId={projectId} onUploadComplete={() => refetchPhotos()} />
+          </div>
+        </TabsContent>
 
       <TabsContent value="documents">
         <Card>
@@ -205,5 +283,14 @@ export default function ProjectDocuments({ projectId }: ProjectDocumentsProps) {
     </Card>
       </TabsContent>
     </Tabs>
+
+    {showBeforeAfter && (
+      <BeforeAfterSlider
+        beforePhotos={beforePhotos}
+        afterPhotos={afterPhotos}
+        onClose={() => setShowBeforeAfter(false)}
+      />
+    )}
+    </>
   );
 }

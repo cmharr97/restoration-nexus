@@ -13,6 +13,7 @@ import ProjectTimeline from '@/components/project-detail/ProjectTimeline';
 import ProjectActivityLog from '@/components/project-detail/ProjectActivityLog';
 import { QuickCameraButton } from '@/components/photos/QuickCameraButton';
 import { QRScanner } from '@/components/photos/QRScanner';
+import { NearbyProjectDetector } from '@/components/photos/NearbyProjectDetector';
 import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 
 export default function ProjectDetail() {
@@ -134,6 +135,9 @@ export default function ProjectDetail() {
       {showQRScanner && (
         <QRScanner onClose={() => setShowQRScanner(false)} />
       )}
+
+      {/* Nearby Project Detector */}
+      <NearbyProjectDetector projects={projects} />
       </div>
     </>
   );
