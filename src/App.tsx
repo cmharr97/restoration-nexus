@@ -13,6 +13,8 @@ import Signup from "./pages/Signup";
 import SetupOrganization from "./pages/SetupOrganization";
 import ScopeGeneratorPage from "./pages/ScopeGeneratorPage";
 import OrganizationSettings from "./pages/OrganizationSettings";
+import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +45,22 @@ const App = () => (
                   element={
                     <ProtectedRoute requireOrganization>
                       <ScopeGeneratorPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/projects"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <Projects />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/projects/:id"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <ProjectDetail />
                     </ProtectedRoute>
                   }
                 />

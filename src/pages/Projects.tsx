@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import CreateProjectDialog from '@/components/CreateProjectDialog';
+import Navigation from '@/components/Navigation';
 import { Plus, Search, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -65,8 +66,10 @@ export default function Projects() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="fixed top-16 left-64 right-0 bg-background border-b border-border z-40 p-6">
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-background">
+        <div className="fixed top-16 left-64 right-0 bg-background border-b border-border z-40 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-headline font-bold">Projects</h1>
@@ -156,7 +159,11 @@ export default function Projects() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer group">
+              <Card 
+                key={project.id} 
+                className="hover:shadow-lg transition-shadow cursor-pointer group"
+                onClick={() => window.location.href = `/projects/${project.id}`}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <Badge className={getLossTypeColor(project.loss_type)}>
@@ -215,6 +222,7 @@ export default function Projects() {
         onOpenChange={setCreateDialogOpen}
         onSubmit={async (data) => { await createProject(data as any); }}
       />
-    </div>
+      </div>
+    </>
   );
 }
