@@ -1,6 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin } from 'lucide-react';
+import { Clock, MapPin, Flame, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface JobCardProps {
@@ -17,9 +17,12 @@ interface JobCardProps {
     };
   };
   isDragging?: boolean;
+  showTime?: boolean;
+  startTime?: string;
+  endTime?: string;
 }
 
-export function JobCard({ job, isDragging }: JobCardProps) {
+export function JobCard({ job, isDragging, showTime, startTime, endTime }: JobCardProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: job.id,
     data: job,
@@ -40,6 +43,12 @@ export function JobCard({ job, isDragging }: JobCardProps) {
     return colors[type] || colors.mitigation;
   };
 
+  const getPriorityStyles = (priority: string) => {
+    if (priority === 'urgent') return 'border-destructive border-2 shadow-destructive/20 shadow-md';
+    if (priority === 'high') return 'border-orange-500 bg-orange-500/5';
+    return '';
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -47,11 +56,22 @@ export function JobCard({ job, isDragging }: JobCardProps) {
       {...listeners}
       {...attributes}
       className={cn(
-        'p-3 bg-card border rounded-lg cursor-move hover:shadow-md transition-all',
+        'p-3 bg-card border rounded-lg cursor-move hover:shadow-md transition-all relative',
         isDragging && 'opacity-50',
-        job.priority === 'urgent' && 'border-destructive'
+        getPriorityStyles(job.priority)
       )}
     >
+      {job.priority === 'urgent' && (
+        <div className="absolute -top-1 -right-1">
+          <Flame className="h-4 w-4 text-destructive fill-destructive" />
+        </div>
+      )}
+      {job.priority === 'high' && (
+        <div className="absolute -top-1 -right-1">
+          <AlertTriangle className="h-4 w-4 text-orange-500 fill-orange-500" />
+        </div>
+      )}
+
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="font-medium text-sm line-clamp-1">{job.name}</h4>
         <Badge className={cn('text-xs', getJobTypeColor(job.job_type))}>
@@ -59,6 +79,13 @@ export function JobCard({ job, isDragging }: JobCardProps) {
         </Badge>
       </div>
       
+      {showTime && startTime && endTime && (
+        <div className="flex items-center gap-1 text-xs font-medium text-primary mb-1">
+          <Clock className="h-3 w-3" />
+          <span>{startTime} - {endTime}</span>
+        </div>
+      )}
+
       {job.address && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
           <MapPin className="h-3 w-3" />
@@ -66,7 +93,7 @@ export function JobCard({ job, isDragging }: JobCardProps) {
         </div>
       )}
 
-      {job.assigned_profile && (
+      {job.assigned_profile && !showTime && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Clock className="h-3 w-3" />
           <span className="line-clamp-1">

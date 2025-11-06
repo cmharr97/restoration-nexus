@@ -136,7 +136,7 @@ function JobsScheduleContent() {
     }
   };
 
-  const handleJobDrop = async (jobId: string, date: string, userId?: string) => {
+  const handleJobDrop = async (jobId: string, date: string, userId?: string, startTime?: string, endTime?: string) => {
     if (!organization || !user) return;
 
     try {
@@ -167,14 +167,14 @@ function JobsScheduleContent() {
           schedule = newSchedule;
         }
 
-        // Create schedule assignment
+        // Create schedule assignment with specified times
         const { error: assignError } = await (supabase
           .from('schedule_assignments' as any)
           .insert({
             schedule_id: schedule.id,
             project_id: jobId,
-            start_time: '09:00:00',
-            end_time: '17:00:00',
+            start_time: startTime || '09:00:00',
+            end_time: endTime || '17:00:00',
             created_by: user.id,
           }) as any);
 
@@ -182,11 +182,12 @@ function JobsScheduleContent() {
 
         toast({
           title: 'Job Assigned',
-          description: 'Job has been added to the schedule',
+          description: `Job scheduled for ${startTime} - ${endTime}`,
         });
       }
 
       await fetchSchedules();
+      await fetchJobs();
     } catch (error: any) {
       console.error('Error assigning job:', error);
       toast({

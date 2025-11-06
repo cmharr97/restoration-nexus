@@ -1,9 +1,13 @@
 import { useDroppable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { format } from 'date-fns';
 import { JobCard } from './JobCard';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { AlertCircle } from 'lucide-react';
+import { hasConflict } from '@/utils/scheduleConflicts';
+import { useState } from 'react';
 
 interface DayViewProps {
   currentDate: Date;
@@ -14,6 +18,7 @@ interface DayViewProps {
 
 export function DayView({ currentDate, jobs, schedules, members }: DayViewProps) {
   const dateStr = format(currentDate, 'yyyy-MM-dd');
+  const [hoveredMember, setHoveredMember] = useState<string | null>(null);
   
   // Get schedules for this specific day grouped by member
   const daySchedules = schedules.filter((s: any) => s.date === dateStr);
@@ -40,6 +45,8 @@ export function DayView({ currentDate, jobs, schedules, members }: DayViewProps)
             dateStr={dateStr}
             jobs={jobs}
             schedules={daySchedules}
+            isHovered={hoveredMember === member.profiles.id}
+            onHoverChange={setHoveredMember}
           />
         ))}
       </div>
@@ -99,9 +106,11 @@ interface MemberScheduleRowProps {
   dateStr: string;
   jobs: any[];
   schedules: any[];
+  isHovered: boolean;
+  onHoverChange: (memberId: string | null) => void;
 }
 
-function MemberScheduleRow({ member, dateStr, jobs, schedules }: MemberScheduleRowProps) {
+function MemberScheduleRow({ member, dateStr, jobs, schedules, isHovered, onHoverChange }: MemberScheduleRowProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: `member-${member.profiles.id}-${dateStr}`,
     data: { 
@@ -112,16 +121,27 @@ function MemberScheduleRow({ member, dateStr, jobs, schedules }: MemberScheduleR
   });
 
   const memberSchedule = schedules.find((s: any) => s.user_id === member.profiles.id);
-  const assignedJobIds = memberSchedule?.assignments?.map((a: any) => a.project_id) || [];
+  const assignments = memberSchedule?.assignments || [];
+  const assignedJobIds = assignments.map((a: any) => a.project_id);
   const memberJobs = jobs.filter((job: any) => assignedJobIds.includes(job.id));
+
+  // Check for conflicts
+  const hasConflicts = assignments.length > 1 && assignments.some((a: any, i: number) => 
+    assignments.slice(i + 1).some((b: any) => 
+      hasConflict(a.start_time, a.end_time, [b])
+    )
+  );
 
   return (
     <div
       ref={setNodeRef}
+      onMouseEnter={() => onHoverChange(member.profiles.id)}
+      onMouseLeave={() => onHoverChange(null)}
       className={cn(
-        'p-4 border rounded-lg transition-colors',
-        isOver && 'bg-accent/10 border-accent',
-        !memberSchedule?.is_available && 'bg-muted/30'
+        'p-4 border rounded-lg transition-all',
+        isOver && 'bg-accent/10 border-accent ring-2 ring-accent/50',
+        !memberSchedule?.is_available && 'bg-muted/30',
+        isHovered && 'shadow-md'
       )}
     >
       <div className="flex items-center justify-between mb-3">
@@ -150,18 +170,33 @@ function MemberScheduleRow({ member, dateStr, jobs, schedules }: MemberScheduleR
           {memberJobs.length > 0 && (
             <Badge variant="outline">{memberJobs.length} jobs</Badge>
           )}
+          {hasConflicts && (
+            <Badge variant="destructive" className="gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Conflicts
+            </Badge>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="space-y-2">
         {memberJobs.length === 0 ? (
-          <div className="col-span-full text-center py-4 border-2 border-dashed rounded-lg text-sm text-muted-foreground">
+          <div className="text-center py-4 border-2 border-dashed rounded-lg text-sm text-muted-foreground">
             Drop jobs here to assign
           </div>
         ) : (
-          memberJobs.map((job: any) => (
-            <JobCard key={job.id} job={job} />
-          ))
+          memberJobs.map((job: any) => {
+            const assignment = assignments.find((a: any) => a.project_id === job.id);
+            return (
+              <JobCard 
+                key={job.id} 
+                job={job}
+                showTime
+                startTime={assignment?.start_time}
+                endTime={assignment?.end_time}
+              />
+            );
+          })
         )}
       </div>
     </div>
