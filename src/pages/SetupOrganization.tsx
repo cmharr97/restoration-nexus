@@ -94,9 +94,9 @@ export default function SetupOrganization() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img src={logoLight} alt="ReCon Pro" className="h-32 w-auto dark:hidden" />
-            <img src={logoDark} alt="ReCon Pro" className="h-32 w-auto hidden dark:block" />
+          <div className="flex justify-center mb-6">
+            <img src={logoLight} alt="ReCon Pro" className="h-48 w-auto dark:hidden" />
+            <img src={logoDark} alt="ReCon Pro" className="h-48 w-auto hidden dark:block" />
           </div>
           <CardTitle className="text-2xl font-headline">Setup Your Organization</CardTitle>
           <CardDescription>
