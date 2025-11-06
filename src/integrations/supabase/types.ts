@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_scopes: {
+        Row: {
+          created_at: string | null
+          description: string
+          detailed_scope: string | null
+          estimated_cost: number | null
+          estimated_duration_days: number | null
+          generated_at: string | null
+          id: string
+          loss_type: Database["public"]["Enums"]["loss_type"]
+          material_list: Json | null
+          model_used: string | null
+          op_justification: string | null
+          photo_urls: string[] | null
+          project_address: string | null
+          project_name: string
+          scope_summary: string | null
+          stage: Database["public"]["Enums"]["project_stage"] | null
+          trades_required: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          detailed_scope?: string | null
+          estimated_cost?: number | null
+          estimated_duration_days?: number | null
+          generated_at?: string | null
+          id?: string
+          loss_type: Database["public"]["Enums"]["loss_type"]
+          material_list?: Json | null
+          model_used?: string | null
+          op_justification?: string | null
+          photo_urls?: string[] | null
+          project_address?: string | null
+          project_name: string
+          scope_summary?: string | null
+          stage?: Database["public"]["Enums"]["project_stage"] | null
+          trades_required?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          detailed_scope?: string | null
+          estimated_cost?: number | null
+          estimated_duration_days?: number | null
+          generated_at?: string | null
+          id?: string
+          loss_type?: Database["public"]["Enums"]["loss_type"]
+          material_list?: Json | null
+          model_used?: string | null
+          op_justification?: string | null
+          photo_urls?: string[] | null
+          project_address?: string | null
+          project_name?: string
+          scope_summary?: string | null
+          stage?: Database["public"]["Enums"]["project_stage"] | null
+          trades_required?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +85,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      loss_type: "water" | "fire" | "mold" | "storm" | "other"
+      project_stage:
+        | "emergency"
+        | "mitigation"
+        | "estimating"
+        | "reconstruction"
+        | "contents"
+        | "closeout"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +219,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      loss_type: ["water", "fire", "mold", "storm", "other"],
+      project_stage: [
+        "emergency",
+        "mitigation",
+        "estimating",
+        "reconstruction",
+        "contents",
+        "closeout",
+      ],
+    },
   },
 } as const
