@@ -23,6 +23,8 @@ import Announcements from "./pages/Announcements";
 import TeamChat from "./pages/TeamChat";
 import Tasks from "./pages/Tasks";
 import CheckIns from "./pages/CheckIns";
+import Boards from "./pages/Boards";
+import Activity from "./pages/Activity";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -117,10 +119,26 @@ const App = () => (
                   }
                 />
                 <Route
-                  path="/chat"
+                  path="/team-chat"
                   element={
                     <ProtectedRoute requireOrganization>
                       <TeamChat />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/boards"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <Boards />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/activity"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <Activity />
                     </ProtectedRoute>
                   }
                 />

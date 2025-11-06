@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Plus, Moon, Sun, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Plus, Moon, Sun, LogOut, MessageSquare, MessageCircle, CheckSquare, Kanban as KanbanIcon, Activity as ActivityIcon, Repeat } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,13 +12,17 @@ import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Repeat } from "lucide-react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  { icon: FileText, label: "AI Scope Generator", path: "/scope-generator" },
   { icon: ClipboardList, label: "Projects", path: "/projects" },
   { icon: Calendar, label: "Schedule", path: "/schedule" },
+  { icon: MessageSquare, label: "Announcements", path: "/announcements" },
+  { icon: MessageCircle, label: "Team Chat", path: "/team-chat" },
+  { icon: CheckSquare, label: "Tasks", path: "/tasks" },
+  { icon: KanbanIcon, label: "Boards", path: "/boards" },
+  { icon: FileText, label: "Check-ins", path: "/check-ins" },
+  { icon: ActivityIcon, label: "Activity", path: "/activity" },
   { icon: Repeat, label: "Recurring Jobs", path: "/recurring-jobs" },
   { icon: BarChart3, label: "Analytics", path: "/analytics" },
 ];

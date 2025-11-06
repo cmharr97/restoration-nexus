@@ -173,6 +173,41 @@ export function PersonalDashboard() {
         </Card>
       </div>
 
+      {/* Quick Access Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Link to="/projects?create=1">
+              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
+                <Briefcase className="h-5 w-5" />
+                <span className="text-sm">New Project</span>
+              </Button>
+            </Link>
+            <Link to="/announcements">
+              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
+                <AlertCircle className="h-5 w-5" />
+                <span className="text-sm">Announcements</span>
+              </Button>
+            </Link>
+            <Link to="/team-chat">
+              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
+                <Users className="h-5 w-5" />
+                <span className="text-sm">Team Chat</span>
+              </Button>
+            </Link>
+            <Link to="/check-ins">
+              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
+                <CheckCircle2 className="h-5 w-5" />
+                <span className="text-sm">Check-in</span>
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Today's Schedule */}
       <Card>
         <CardHeader>
@@ -327,29 +362,59 @@ export function PersonalDashboard() {
 
       {/* Manager-specific section */}
       {isManager && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-success" />
-              Team Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <p className="text-muted-foreground">
-                View team schedules, workload analytics, and project assignments
-              </p>
-              <div className="flex gap-2">
-                <Link to="/schedule">
-                  <Button variant="outline" size="sm">Schedule</Button>
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-success" />
+                Team Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <p className="text-muted-foreground">
+                  View team schedules, workload analytics, and project assignments
+                </p>
+                <div className="flex gap-2">
+                  <Link to="/schedule">
+                    <Button variant="outline" size="sm">Schedule</Button>
+                  </Link>
+                  <Link to="/analytics">
+                    <Button variant="outline" size="sm">Analytics</Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Command Center</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <Link to="/boards">
+                  <Button variant="outline" className="w-full justify-start">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Project Boards
+                  </Button>
                 </Link>
-                <Link to="/analytics">
-                  <Button variant="outline" size="sm">Analytics</Button>
+                <Link to="/activity">
+                  <Button variant="outline" className="w-full justify-start">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Activity Feed
+                  </Button>
+                </Link>
+                <Link to="/recurring-jobs">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Recurring Jobs
+                  </Button>
                 </Link>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );

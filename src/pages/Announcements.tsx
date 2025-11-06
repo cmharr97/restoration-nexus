@@ -30,6 +30,7 @@ function AnnouncementsContent() {
   const { toast } = useToast();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reactions, setReactions] = useState<Record<string, any[]>>({});
   const [showCreate, setShowCreate] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
