@@ -14,8 +14,9 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Repeat, Plus, Play, Pause, Trash2, Loader2, Calendar, AlertCircle } from 'lucide-react';
+import { Repeat, Plus, Play, Pause, Trash2, Loader2, Calendar, AlertCircle, ExternalLink } from 'lucide-react';
 import { format, addMonths } from 'date-fns';
+import { Link } from 'react-router-dom';
 
 export default function RecurringJobs() {
   return (
@@ -597,6 +598,14 @@ function RecurringJobsContent() {
                                   {skippedCount} skipped (conflicts)
                                 </Badge>
                               )}
+                              <Link to="/schedule" className="text-accent hover:underline flex items-center gap-1">
+                                View in Schedule
+                                <ExternalLink className="h-3 w-3" />
+                              </Link>
+                              <Link to="/projects" className="text-accent hover:underline flex items-center gap-1">
+                                View All Jobs
+                                <ExternalLink className="h-3 w-3" />
+                              </Link>
                             </div>
                           )}
                         </div>

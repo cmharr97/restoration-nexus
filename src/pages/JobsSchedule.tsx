@@ -15,9 +15,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Briefcase, Calendar, Plus, UserPlus, ArrowRightLeft, Loader2, Clock, CalendarDays } from 'lucide-react';
-import { format } from 'date-fns';
+import { Briefcase, Calendar, Plus, UserPlus, ArrowRightLeft, Loader2, Clock, CalendarDays, Download, FileText, CalendarPlus } from 'lucide-react';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { CalendarView } from '@/components/schedule/CalendarView';
+import { MobileScheduleView } from '@/components/schedule/MobileScheduleView';
+import { exportScheduleToPDF, exportScheduleToICalendar } from '@/utils/scheduleExport';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function JobsSchedule() {
   return (
@@ -31,11 +35,13 @@ function JobsScheduleContent() {
   const { organization, hasRole } = useOrganization();
   const { user } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState('calendar');
   const [jobs, setJobs] = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   
   const canManageJobs = hasRole(['owner', 'admin', 'pm', 'executive']);
   const canManageSchedules = hasRole(['owner', 'admin', 'pm', 'executive']);
@@ -198,17 +204,140 @@ function JobsScheduleContent() {
     }
   };
 
+  const handleReassign = async (assignmentId: string, newUserId: string) => {
+    if (!organization || !user) return;
+
+    try {
+      // Get the assignment details
+      const assignment = schedules
+        .flatMap((s: any) => s.assignments || [])
+        .find((a: any) => a.id === assignmentId);
+
+      if (!assignment) throw new Error('Assignment not found');
+
+      // Create new schedule for the new user if needed
+      const schedule = schedules.find((s: any) => 
+        s.assignments?.some((a: any) => a.id === assignmentId)
+      );
+      
+      if (!schedule) throw new Error('Schedule not found');
+
+      let { data: newSchedule, error: scheduleError } = await (supabase
+        .from('user_schedules' as any)
+        .select('*')
+        .eq('user_id', newUserId)
+        .eq('date', schedule.date)
+        .maybeSingle() as any);
+
+      if (!newSchedule) {
+        const { data: created, error: createError } = await (supabase
+          .from('user_schedules' as any)
+          .insert({
+            user_id: newUserId,
+            organization_id: organization.id,
+            date: schedule.date,
+            is_available: true,
+          })
+          .select()
+          .single() as any);
+
+        if (createError) throw createError;
+        newSchedule = created;
+      }
+
+      // Update the assignment
+      const { error: updateError } = await (supabase
+        .from('schedule_assignments' as any)
+        .update({ schedule_id: newSchedule.id })
+        .eq('id', assignmentId) as any);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: 'Job Reassigned',
+        description: 'Job has been reassigned successfully',
+      });
+
+      await fetchSchedules();
+    } catch (error: any) {
+      console.error('Error reassigning job:', error);
+      toast({
+        title: 'Reassignment Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleExportPDF = () => {
+    const startDate = startOfMonth(currentMonth);
+    const endDate = endOfMonth(currentMonth);
+    
+    exportScheduleToPDF({
+      schedules,
+      members,
+      startDate,
+      endDate,
+    });
+
+    toast({
+      title: 'Export Complete',
+      description: 'Schedule exported to PDF',
+    });
+  };
+
+  const handleExportICalendar = () => {
+    const startDate = startOfMonth(currentMonth);
+    const endDate = endOfMonth(currentMonth);
+    
+    exportScheduleToICalendar(
+      {
+        schedules,
+        members,
+        startDate,
+        endDate,
+      },
+      organization?.name || 'Organization'
+    );
+
+    toast({
+      title: 'Export Complete',
+      description: 'Schedule exported to iCalendar format',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
       <main className="lg:ml-64 mt-16 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold font-headline mb-2">Jobs & Schedules</h1>
-            <p className="text-muted-foreground text-lg">
-              Manage job assignments and team schedules
-            </p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold font-headline mb-2">Jobs & Schedules</h1>
+              <p className="text-muted-foreground text-lg">
+                Manage job assignments and team schedules
+              </p>
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportPDF} className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Export to PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportICalendar} className="gap-2">
+                  <CalendarPlus className="h-4 w-4" />
+                  Export to iCalendar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {loading ? (
@@ -233,12 +362,20 @@ function JobsScheduleContent() {
               </TabsList>
 
               <TabsContent value="calendar">
-                <CalendarView
-                  jobs={jobs}
-                  schedules={schedules}
-                  members={members}
-                  onJobDrop={handleJobDrop}
-                />
+                {isMobile ? (
+                  <MobileScheduleView
+                    schedules={schedules}
+                    members={members}
+                    onReassign={handleReassign}
+                  />
+                ) : (
+                  <CalendarView
+                    jobs={jobs}
+                    schedules={schedules}
+                    members={members}
+                    onJobDrop={handleJobDrop}
+                  />
+                )}
               </TabsContent>
 
               <TabsContent value="jobs">
