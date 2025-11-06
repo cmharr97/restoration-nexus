@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Building2, Users, Save } from 'lucide-react';
+import { Loader2, Building2, Users, Save, History, UserPlus, Shield, UserX, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function OrganizationSettings() {
@@ -226,6 +228,8 @@ function TeamManagement() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('coordinator');
   const [inviting, setInviting] = useState(false);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const roles = [
     { value: 'owner', label: 'Owner' },
@@ -245,6 +249,7 @@ function TeamManagement() {
 
   useEffect(() => {
     fetchMembers();
+    fetchActivityLogs();
   }, [organization]);
 
   const fetchMembers = async () => {
@@ -272,6 +277,31 @@ function TeamManagement() {
       console.error('Error fetching members:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchActivityLogs = async () => {
+    if (!organization) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('organization_audit_log' as any)
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            email
+          )
+        `)
+        .eq('organization_id', organization.id)
+        .eq('entity_type', 'member')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setActivityLogs((data as any) || []);
+    } catch (error: any) {
+      console.error('Error fetching activity logs:', error);
     }
   };
 
@@ -307,6 +337,7 @@ function TeamManagement() {
       if (error) throw error;
 
       await fetchMembers();
+      await fetchActivityLogs();
 
       toast({
         title: 'Role Updated',
@@ -331,6 +362,7 @@ function TeamManagement() {
       if (error) throw error;
 
       await fetchMembers();
+      await fetchActivityLogs();
 
       toast({
         title: 'Member Deactivated',
@@ -473,6 +505,79 @@ function TeamManagement() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Activity History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline flex items-center gap-2">
+            <History className="h-5 w-5" />
+            Member Activity History
+          </CardTitle>
+          <CardDescription>
+            Recent member invitations, role changes, and status updates
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {activityLogs.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No activity recorded yet
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {activityLogs.map((log: any) => {
+                const memberEmail = members.find(m => m.id === log.details?.member_id)?.profiles?.email;
+                
+                return (
+                  <div
+                    key={log.id}
+                    className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/5 transition-colors"
+                  >
+                    <div className="mt-1">
+                      {log.action === 'invited' && <UserPlus className="h-4 w-4 text-green-500" />}
+                      {log.action === 'role_changed' && <Shield className="h-4 w-4 text-blue-500" />}
+                      {log.action === 'deactivated' && <UserX className="h-4 w-4 text-red-500" />}
+                      {log.action === 'reactivated' && <UserPlus className="h-4 w-4 text-green-500" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="font-medium text-sm">
+                          {log.profiles?.full_name || log.profiles?.email || 'Unknown user'}
+                        </span>
+                        <Badge variant="secondary" className="text-xs">
+                          {log.action === 'invited' && 'Invited Member'}
+                          {log.action === 'role_changed' && 'Changed Role'}
+                          {log.action === 'deactivated' && 'Deactivated'}
+                          {log.action === 'reactivated' && 'Reactivated'}
+                        </Badge>
+                        {memberEmail && (
+                          <span className="text-xs text-muted-foreground">
+                            {memberEmail}
+                          </span>
+                        )}
+                      </div>
+                      {log.action === 'role_changed' && log.old_value && log.new_value && (
+                        <p className="text-sm text-muted-foreground">
+                          Role changed from <span className="font-medium">{log.old_value}</span> to{' '}
+                          <span className="font-medium">{log.new_value}</span>
+                        </p>
+                      )}
+                      {log.action === 'invited' && log.new_value && (
+                        <p className="text-sm text-muted-foreground">
+                          Invited as <span className="font-medium">{log.new_value}</span>
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </CardContent>
