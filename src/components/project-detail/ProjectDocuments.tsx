@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { PhotoGallery } from '@/components/photos/PhotoGallery';
+import { BatchPhotoUploader } from '@/components/photos/BatchPhotoUploader';
 
 interface ProjectDocumentsProps {
   projectId: string;
@@ -114,7 +115,10 @@ export default function ProjectDocuments({ projectId }: ProjectDocumentsProps) {
       </TabsList>
 
       <TabsContent value="photos" className="space-y-6">
-        <PhotoUploader projectId={projectId} onUploadComplete={fetchDocuments} />
+        <div className="grid md:grid-cols-2 gap-6">
+          <PhotoUploader projectId={projectId} onUploadComplete={fetchDocuments} />
+          <BatchPhotoUploader projectId={projectId} onUploadComplete={fetchDocuments} />
+        </div>
         <PhotoGallery projectId={projectId} />
       </TabsContent>
 

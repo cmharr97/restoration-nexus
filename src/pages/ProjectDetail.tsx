@@ -10,6 +10,7 @@ import ProjectTeamMembers from '@/components/project-detail/ProjectTeamMembers';
 import ProjectDocuments from '@/components/project-detail/ProjectDocuments';
 import ProjectTimeline from '@/components/project-detail/ProjectTimeline';
 import ProjectActivityLog from '@/components/project-detail/ProjectActivityLog';
+import { QuickCameraButton } from '@/components/photos/QuickCameraButton';
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -99,6 +100,9 @@ export default function ProjectDetail() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Floating Quick Camera Button */}
+      <QuickCameraButton projectId={project.id} onPhotoTaken={() => window.location.reload()} />
       </div>
     </>
   );

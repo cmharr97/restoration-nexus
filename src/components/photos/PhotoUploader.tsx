@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Camera, Upload, Loader2, X, MapPin } from 'lucide-react';
@@ -14,10 +15,26 @@ import { Progress } from '@/components/ui/progress';
 
 interface PhotoUploaderProps {
   projectId: string;
+  initialFile?: File | null;
   onUploadComplete?: () => void;
 }
 
-export function PhotoUploader({ projectId, onUploadComplete }: PhotoUploaderProps) {
+const ROOM_TYPES = [
+  'Auto-detect',
+  'Kitchen',
+  'Bathroom',
+  'Bedroom',
+  'Living Room',
+  'Dining Room',
+  'Basement',
+  'Attic',
+  'Garage',
+  'Exterior',
+  'Roof',
+  'Office',
+];
+
+export function PhotoUploader({ projectId, initialFile, onUploadComplete }: PhotoUploaderProps) {
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
@@ -25,14 +42,26 @@ export function PhotoUploader({ projectId, onUploadComplete }: PhotoUploaderProp
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(initialFile || null);
   const [caption, setCaption] = useState('');
   const [notes, setNotes] = useState('');
   const [isBeforePhoto, setIsBeforePhoto] = useState(false);
   const [isAfterPhoto, setIsAfterPhoto] = useState(false);
+  const [manualRoomType, setManualRoomType] = useState('Auto-detect');
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Load initial file if provided
+  useState(() => {
+    if (initialFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(initialFile);
+    }
+  });
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -98,32 +127,34 @@ export function PhotoUploader({ projectId, onUploadComplete }: PhotoUploaderProp
       setProgress(60);
       setAnalyzing(true);
 
-      // Analyze with AI
+      // Analyze with AI (skip if manual room is selected)
       let aiMetadata = {
         ai_category: null,
-        ai_room_type: null,
+        ai_room_type: manualRoomType !== 'Auto-detect' ? manualRoomType.toLowerCase() : null,
         ai_damage_type: null,
         ai_description: null,
         ai_tags: null,
         ai_confidence: null,
       };
 
-      try {
-        const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-photo', {
-          body: {
-            imageUrl: publicUrl,
-            projectId: projectId,
-          },
-        });
+      if (manualRoomType === 'Auto-detect') {
+        try {
+          const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-photo', {
+            body: {
+              imageUrl: publicUrl,
+              projectId: projectId,
+            },
+          });
 
-        if (!analysisError && analysisData) {
-          aiMetadata = analysisData;
-          console.log('AI Analysis:', aiMetadata);
-        } else {
-          console.warn('AI analysis failed:', analysisError);
+          if (!analysisError && analysisData) {
+            aiMetadata = { ...aiMetadata, ...analysisData };
+            console.log('AI Analysis:', aiMetadata);
+          } else {
+            console.warn('AI analysis failed:', analysisError);
+          }
+        } catch (aiError) {
+          console.warn('AI analysis error (non-blocking):', aiError);
         }
-      } catch (aiError) {
-        console.warn('AI analysis error (non-blocking):', aiError);
       }
 
       setAnalyzing(false);
@@ -256,6 +287,27 @@ export function PhotoUploader({ projectId, onUploadComplete }: PhotoUploaderProp
 
           {/* Metadata */}
           <div className="space-y-3">
+            <div>
+              <Label htmlFor="room">Room Type</Label>
+              <Select value={manualRoomType} onValueChange={setManualRoomType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROOM_TYPES.map((room) => (
+                    <SelectItem key={room} value={room}>
+                      {room}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {manualRoomType === 'Auto-detect' && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  AI will automatically detect the room type
+                </p>
+              )}
+            </div>
+
             <div>
               <Label htmlFor="caption">Caption (Optional)</Label>
               <Input
