@@ -19,6 +19,10 @@ import ProjectDetail from "./pages/ProjectDetail";
 import JobsSchedule from "./pages/JobsSchedule";
 import RecurringJobs from "./pages/RecurringJobs";
 import Analytics from "./pages/Analytics";
+import Announcements from "./pages/Announcements";
+import TeamChat from "./pages/TeamChat";
+import Tasks from "./pages/Tasks";
+import CheckIns from "./pages/CheckIns";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -101,6 +105,38 @@ const App = () => (
                   element={
                     <ProtectedRoute requireOrganization>
                       <Analytics />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/announcements"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <Announcements />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/chat"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <TeamChat />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tasks"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <Tasks />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/check-ins"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <CheckIns />
                     </ProtectedRoute>
                   }
                 />
