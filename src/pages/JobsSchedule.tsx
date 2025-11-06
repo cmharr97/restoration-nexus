@@ -15,8 +15,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Briefcase, Calendar, Plus, UserPlus, ArrowRightLeft, Loader2, Clock } from 'lucide-react';
+import { Briefcase, Calendar, Plus, UserPlus, ArrowRightLeft, Loader2, Clock, CalendarDays } from 'lucide-react';
 import { format } from 'date-fns';
+import { CalendarView } from '@/components/schedule/CalendarView';
 
 export default function JobsSchedule() {
   return (
@@ -30,10 +31,171 @@ function JobsScheduleContent() {
   const { organization, hasRole } = useOrganization();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('jobs');
+  const [activeTab, setActiveTab] = useState('calendar');
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [schedules, setSchedules] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const canManageJobs = hasRole(['owner', 'admin', 'pm', 'executive']);
   const canManageSchedules = hasRole(['owner', 'admin', 'pm', 'executive']);
+
+  useEffect(() => {
+    fetchAllData();
+  }, [organization]);
+
+  const fetchAllData = async () => {
+    if (!organization) return;
+    
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchJobs(),
+        fetchSchedules(),
+        fetchMembers(),
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchJobs = async () => {
+    if (!organization) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('projects' as any)
+        .select(`
+          *,
+          assigned_profile:assigned_to (
+            id,
+            full_name,
+            email,
+            avatar_url
+          )
+        `)
+        .eq('organization_id', organization.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setJobs(data || []);
+    } catch (error: any) {
+      console.error('Error fetching jobs:', error);
+    }
+  };
+
+  const fetchSchedules = async () => {
+    if (!organization) return;
+
+    try {
+      const { data, error } = await (supabase
+        .from('user_schedules' as any)
+        .select(`
+          *,
+          assignments:schedule_assignments (
+            *,
+            projects:project_id (
+              id,
+              name,
+              job_type
+            )
+          )
+        `)
+        .eq('organization_id', organization.id) as any);
+
+      if (error) throw error;
+      setSchedules((data as any) || []);
+    } catch (error: any) {
+      console.error('Error fetching schedules:', error);
+    }
+  };
+
+  const fetchMembers = async () => {
+    if (!organization) return;
+
+    try {
+      const { data, error } = await (supabase
+        .from('organization_members')
+        .select(`
+          *,
+          profiles:user_id (
+            id,
+            email,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('organization_id', organization.id)
+        .eq('is_active', true)
+        .order('joined_at', { ascending: false }) as any);
+
+      if (error) throw error;
+      setMembers((data as any) || []);
+    } catch (error: any) {
+      console.error('Error fetching members:', error);
+    }
+  };
+
+  const handleJobDrop = async (jobId: string, date: string, userId?: string) => {
+    if (!organization || !user) return;
+
+    try {
+      // If userId is provided, ensure schedule exists for that user on that date
+      if (userId) {
+        // Check if schedule exists
+        let { data: schedule, error: scheduleError } = await (supabase
+          .from('user_schedules' as any)
+          .select('*')
+          .eq('user_id', userId)
+          .eq('date', date)
+          .maybeSingle() as any);
+
+        // Create schedule if it doesn't exist
+        if (!schedule) {
+          const { data: newSchedule, error: createError } = await (supabase
+            .from('user_schedules' as any)
+            .insert({
+              user_id: userId,
+              organization_id: organization.id,
+              date: date,
+              is_available: true,
+            })
+            .select()
+            .single() as any);
+
+          if (createError) throw createError;
+          schedule = newSchedule;
+        }
+
+        // Create schedule assignment
+        const { error: assignError } = await (supabase
+          .from('schedule_assignments' as any)
+          .insert({
+            schedule_id: schedule.id,
+            project_id: jobId,
+            start_time: '09:00:00',
+            end_time: '17:00:00',
+            created_by: user.id,
+          }) as any);
+
+        if (assignError) throw assignError;
+
+        toast({
+          title: 'Job Assigned',
+          description: 'Job has been added to the schedule',
+        });
+      }
+
+      await fetchSchedules();
+    } catch (error: any) {
+      console.error('Error assigning job:', error);
+      toast({
+        title: 'Assignment Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,33 +210,58 @@ function JobsScheduleContent() {
             </p>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="jobs" className="gap-2">
-                <Briefcase className="h-4 w-4" />
-                Jobs
-              </TabsTrigger>
-              <TabsTrigger value="schedules" className="gap-2">
-                <Calendar className="h-4 w-4" />
-                Schedules
-              </TabsTrigger>
-            </TabsList>
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-accent" />
+            </div>
+          ) : (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="calendar" className="gap-2">
+                  <CalendarDays className="h-4 w-4" />
+                  Calendar
+                </TabsTrigger>
+                <TabsTrigger value="jobs" className="gap-2">
+                  <Briefcase className="h-4 w-4" />
+                  Jobs
+                </TabsTrigger>
+                <TabsTrigger value="schedules" className="gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Schedules
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="jobs">
-              <JobsManagement canManage={canManageJobs} />
-            </TabsContent>
+              <TabsContent value="calendar">
+                <CalendarView
+                  jobs={jobs}
+                  schedules={schedules}
+                  members={members}
+                  onJobDrop={handleJobDrop}
+                />
+              </TabsContent>
 
-            <TabsContent value="schedules">
-              <SchedulesManagement canManage={canManageSchedules} />
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="jobs">
+                <JobsManagement 
+                  canManage={canManageJobs}
+                  onJobsChange={fetchJobs}
+                />
+              </TabsContent>
+
+              <TabsContent value="schedules">
+                <SchedulesManagement 
+                  canManage={canManageSchedules}
+                  onSchedulesChange={fetchSchedules}
+                />
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </main>
     </div>
   );
 }
 
-function JobsManagement({ canManage }: { canManage: boolean }) {
+function JobsManagement({ canManage, onJobsChange }: { canManage: boolean; onJobsChange?: () => void }) {
   const { organization } = useOrganization();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -185,6 +372,7 @@ function JobsManagement({ canManage }: { canManage: boolean }) {
       });
 
       await fetchJobs();
+      onJobsChange?.();
       setShowCreateDialog(false);
       setFormData({
         name: '',
@@ -221,6 +409,7 @@ function JobsManagement({ canManage }: { canManage: boolean }) {
       });
 
       await fetchJobs();
+      onJobsChange?.();
       setShowAssignDialog(false);
       setSelectedJob(null);
     } catch (error: any) {
@@ -539,7 +728,7 @@ function JobsManagement({ canManage }: { canManage: boolean }) {
   );
 }
 
-function SchedulesManagement({ canManage }: { canManage: boolean }) {
+function SchedulesManagement({ canManage, onSchedulesChange }: { canManage: boolean; onSchedulesChange?: () => void }) {
   const { organization } = useOrganization();
   const { user } = useAuth();
   const { toast } = useToast();
