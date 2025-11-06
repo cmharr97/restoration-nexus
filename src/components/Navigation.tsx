@@ -10,25 +10,17 @@ import { useOrganization } from "@/hooks/useOrganization";
 import NotificationBell from "@/components/NotificationBell";
 import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Repeat } from "lucide-react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: FileText, label: "AI Scope Generator", path: "/scope-generator" },
-  { icon: Users, label: "CRM", path: "/crm" },
-  { icon: ClipboardList, label: "Projects", path: "/projects", badge: 24 },
+  { icon: ClipboardList, label: "Projects", path: "/projects" },
   { icon: Calendar, label: "Schedule", path: "/schedule" },
   { icon: Repeat, label: "Recurring Jobs", path: "/recurring-jobs" },
   { icon: BarChart3, label: "Analytics", path: "/analytics" },
-  { icon: Droplets, label: "Moisture", path: "/moisture" },
-  { icon: Wrench, label: "Equipment", path: "/equipment" },
-  { icon: Package, label: "Contents", path: "/contents" },
-  { icon: FileQuestion, label: "RFIs", path: "/rfis", badge: 5 },
-  { icon: Upload, label: "Submittals", path: "/submittals" },
-  { icon: DollarSign, label: "Financials", path: "/financials" },
-  { icon: UserCog, label: "Subcontractors", path: "/subcontractors" },
 ];
 
 export default function Navigation() {
@@ -37,7 +29,24 @@ export default function Navigation() {
   const { user, signOut } = useAuth();
   const { organization, membership } = useOrganization();
 
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => setProfile(data));
+    }
+  }, [user]);
+
   const getUserInitials = () => {
+    if (profile?.full_name) {
+      const names = profile.full_name.split(' ');
+      return names.map((n: string) => n[0]).join('').toUpperCase().substring(0, 2);
+    }
     if (!user?.email) return '?';
     return user.email[0].toUpperCase();
   };
@@ -100,7 +109,9 @@ export default function Navigation() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div>
-                  <p className="font-medium">{user?.email}</p>
+                  <p className="font-medium">
+                    {profile?.full_name || user?.email}
+                  </p>
                   {membership && (
                     <p className="text-xs text-muted-foreground capitalize">
                       {membership.role.replace(/_/g, ' ')}
@@ -146,11 +157,6 @@ export default function Navigation() {
             >
               <item.icon className="h-5 w-5 text-muted-foreground group-hover:text-sidebar-accent-foreground" />
               <span className="font-medium">{item.label}</span>
-              {item.badge && (
-                <Badge variant="secondary" className="ml-auto bg-accent text-accent-foreground">
-                  {item.badge}
-                </Badge>
-              )}
             </Link>
           ))}
 
