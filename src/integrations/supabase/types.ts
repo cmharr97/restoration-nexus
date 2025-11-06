@@ -390,52 +390,124 @@ export type Database = {
       }
       projects: {
         Row: {
+          actual_completion_date: string | null
+          actual_cost: number | null
           address: string | null
+          adjuster_email: string | null
+          adjuster_name: string | null
+          adjuster_phone: string | null
           assigned_to: string | null
+          city: string | null
+          claim_number: string | null
           created_at: string
           created_by: string
+          deductible: number | null
           description: string | null
           end_date: string | null
+          estimated_cost: number | null
           id: string
+          insurance_carrier: string | null
           job_type: Database["public"]["Enums"]["job_type"]
+          loss_date: string | null
+          loss_description: string | null
+          loss_type: string | null
           name: string
+          notes: string | null
           organization_id: string
+          owner_email: string | null
+          owner_name: string | null
+          owner_phone: string | null
+          policy_number: string | null
           priority: string | null
+          project_number: string | null
           start_date: string | null
+          state: string | null
           status: string
+          target_completion_date: string | null
+          template_used: string | null
+          tpa_name: string | null
           updated_at: string
+          zip: string | null
         }
         Insert: {
+          actual_completion_date?: string | null
+          actual_cost?: number | null
           address?: string | null
+          adjuster_email?: string | null
+          adjuster_name?: string | null
+          adjuster_phone?: string | null
           assigned_to?: string | null
+          city?: string | null
+          claim_number?: string | null
           created_at?: string
           created_by: string
+          deductible?: number | null
           description?: string | null
           end_date?: string | null
+          estimated_cost?: number | null
           id?: string
+          insurance_carrier?: string | null
           job_type: Database["public"]["Enums"]["job_type"]
+          loss_date?: string | null
+          loss_description?: string | null
+          loss_type?: string | null
           name: string
+          notes?: string | null
           organization_id: string
+          owner_email?: string | null
+          owner_name?: string | null
+          owner_phone?: string | null
+          policy_number?: string | null
           priority?: string | null
+          project_number?: string | null
           start_date?: string | null
+          state?: string | null
           status?: string
+          target_completion_date?: string | null
+          template_used?: string | null
+          tpa_name?: string | null
           updated_at?: string
+          zip?: string | null
         }
         Update: {
+          actual_completion_date?: string | null
+          actual_cost?: number | null
           address?: string | null
+          adjuster_email?: string | null
+          adjuster_name?: string | null
+          adjuster_phone?: string | null
           assigned_to?: string | null
+          city?: string | null
+          claim_number?: string | null
           created_at?: string
           created_by?: string
+          deductible?: number | null
           description?: string | null
           end_date?: string | null
+          estimated_cost?: number | null
           id?: string
+          insurance_carrier?: string | null
           job_type?: Database["public"]["Enums"]["job_type"]
+          loss_date?: string | null
+          loss_description?: string | null
+          loss_type?: string | null
           name?: string
+          notes?: string | null
           organization_id?: string
+          owner_email?: string | null
+          owner_name?: string | null
+          owner_phone?: string | null
+          policy_number?: string | null
           priority?: string | null
+          project_number?: string | null
           start_date?: string | null
+          state?: string | null
           status?: string
+          target_completion_date?: string | null
+          template_used?: string | null
+          tpa_name?: string | null
           updated_at?: string
+          zip?: string | null
         }
         Relationships: [
           {
@@ -711,6 +783,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_project_number: { Args: never; Returns: string }
       generate_recurring_jobs: {
         Args: {
           p_end_date: string
