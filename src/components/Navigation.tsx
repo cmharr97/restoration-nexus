@@ -52,8 +52,8 @@ export default function Navigation() {
         </Button>
 
         <div className="flex items-center gap-3">
-          <img src={logoLight} alt="ReCon Pro" className="h-12 w-auto dark:hidden" />
-          <img src={logoDark} alt="ReCon Pro" className="h-12 w-auto hidden dark:block" />
+          <img src={logoLight} alt="ReCon Pro" className="h-16 w-auto dark:hidden" />
+          <img src={logoDark} alt="ReCon Pro" className="h-16 w-auto hidden dark:block" />
         </div>
 
         <div className="flex-1 max-w-2xl mx-auto hidden md:block">

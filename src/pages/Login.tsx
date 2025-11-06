@@ -58,8 +58,8 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={logoLight} alt="ReCon Pro" className="h-24 w-auto dark:hidden" />
-            <img src={logoDark} alt="ReCon Pro" className="h-24 w-auto hidden dark:block" />
+            <img src={logoLight} alt="ReCon Pro" className="h-32 w-auto dark:hidden" />
+            <img src={logoDark} alt="ReCon Pro" className="h-32 w-auto hidden dark:block" />
           </div>
           <CardTitle className="text-2xl font-headline">Welcome to ReCon Pro</CardTitle>
           <CardDescription>Sign in to your account to continue</CardDescription>
