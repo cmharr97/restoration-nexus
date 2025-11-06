@@ -4,6 +4,7 @@ import ProjectCard from "@/components/ProjectCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import {
   Droplet,
   Flame,
@@ -15,6 +16,7 @@ import {
   CheckCircle2,
   Wrench,
   DollarSign,
+  Sparkles,
 } from "lucide-react";
 
 export default function Index() {
@@ -25,10 +27,20 @@ export default function Index() {
       <main className="lg:ml-64 mt-16 p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold font-headline mb-2">Executive Dashboard</h1>
-          <p className="text-muted-foreground text-lg">
-            Real-time overview of operations, projects, and equipment
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-4xl font-bold font-headline mb-2">Executive Dashboard</h1>
+              <p className="text-muted-foreground text-lg">
+                Real-time overview of operations, projects, and equipment
+              </p>
+            </div>
+            <Link to="/scope-generator">
+              <Button className="bg-accent hover:bg-accent/90 gap-2">
+                <Sparkles className="h-5 w-5" />
+                AI Scope Generator
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Metrics Grid */}

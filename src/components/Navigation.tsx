@@ -1,4 +1,5 @@
 import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Bell, Plus, Moon, Sun } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +10,8 @@ import { useState } from "react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: FileText, label: "AI Scope Generator", path: "/scope-generator" },
   { icon: Users, label: "CRM", path: "/crm" },
-  { icon: FileText, label: "Claims", path: "/claims", badge: 12 },
   { icon: ClipboardList, label: "Projects", path: "/projects", badge: 24 },
   { icon: Calendar, label: "Schedule", path: "/schedule" },
   { icon: Droplets, label: "Moisture", path: "/moisture" },
@@ -90,8 +91,9 @@ export default function Navigation() {
       >
         <div className="flex flex-col h-full overflow-y-auto py-4">
           {navItems.map((item) => (
-            <button
+            <Link
               key={item.path}
+              to={item.path}
               className="flex items-center gap-3 px-4 py-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors group relative"
             >
               <item.icon className="h-5 w-5 text-muted-foreground group-hover:text-sidebar-accent-foreground" />
@@ -101,7 +103,7 @@ export default function Navigation() {
                   {item.badge}
                 </Badge>
               )}
-            </button>
+            </Link>
           ))}
 
           <div className="mt-auto pt-4 border-t border-sidebar-border">
