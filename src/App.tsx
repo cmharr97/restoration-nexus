@@ -16,6 +16,7 @@ import OrganizationSettings from "./pages/OrganizationSettings";
 import OrganizationProfile from "./pages/OrganizationProfile";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
+import JobsSchedule from "./pages/JobsSchedule";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -74,6 +75,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireOrganization>
                       <OrganizationProfile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/schedule"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <JobsSchedule />
                     </ProtectedRoute>
                   }
                 />
