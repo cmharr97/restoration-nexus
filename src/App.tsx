@@ -13,6 +13,7 @@ import Signup from "./pages/Signup";
 import SetupOrganization from "./pages/SetupOrganization";
 import ScopeGeneratorPage from "./pages/ScopeGeneratorPage";
 import OrganizationSettings from "./pages/OrganizationSettings";
+import OrganizationProfile from "./pages/OrganizationProfile";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import NotFound from "./pages/NotFound";
@@ -67,6 +68,14 @@ const App = () => (
                 <Route
                   path="/settings"
                   element={<OrganizationSettings />}
+                />
+                <Route
+                  path="/organization/profile"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <OrganizationProfile />
+                    </ProtectedRoute>
+                  }
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
