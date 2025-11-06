@@ -298,6 +298,96 @@ export type Database = {
           },
         ]
       }
+      project_photos: {
+        Row: {
+          ai_category: string | null
+          ai_confidence: number | null
+          ai_damage_type: string | null
+          ai_description: string | null
+          ai_room_type: string | null
+          ai_tags: string[] | null
+          caption: string | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          is_after_photo: boolean | null
+          is_before_photo: boolean | null
+          location_lat: number | null
+          location_lng: number | null
+          mime_type: string | null
+          notes: string | null
+          organization_id: string
+          project_id: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          ai_category?: string | null
+          ai_confidence?: number | null
+          ai_damage_type?: string | null
+          ai_description?: string | null
+          ai_room_type?: string | null
+          ai_tags?: string[] | null
+          caption?: string | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_after_photo?: boolean | null
+          is_before_photo?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          mime_type?: string | null
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          ai_category?: string | null
+          ai_confidence?: number | null
+          ai_damage_type?: string | null
+          ai_description?: string | null
+          ai_room_type?: string | null
+          ai_tags?: string[] | null
+          caption?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_after_photo?: boolean | null
+          is_before_photo?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          mime_type?: string | null
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_photos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           address: string | null

@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, File, Image, FileText, Download, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { PhotoUploader } from '@/components/photos/PhotoUploader';
+import { PhotoGallery } from '@/components/photos/PhotoGallery';
 
 interface ProjectDocumentsProps {
   projectId: string;
@@ -104,7 +107,19 @@ export default function ProjectDocuments({ projectId }: ProjectDocumentsProps) {
   };
 
   return (
-    <Card>
+    <Tabs defaultValue="photos" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="photos">Photos</TabsTrigger>
+        <TabsTrigger value="documents">Documents</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="photos" className="space-y-6">
+        <PhotoUploader projectId={projectId} onUploadComplete={fetchDocuments} />
+        <PhotoGallery projectId={projectId} />
+      </TabsContent>
+
+      <TabsContent value="documents">
+        <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Documents</CardTitle>
@@ -184,5 +199,7 @@ export default function ProjectDocuments({ projectId }: ProjectDocumentsProps) {
         )}
       </CardContent>
     </Card>
+      </TabsContent>
+    </Tabs>
   );
 }

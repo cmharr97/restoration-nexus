@@ -2,3 +2,6 @@ project_id = "xmrrcgrhogexlqwylftz"
 
 [functions.generate-scope]
 verify_jwt = false
+
+[functions.analyze-photo]
+verify_jwt = true
