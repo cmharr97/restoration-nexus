@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Navigation, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Project {
   id: string;
@@ -36,11 +37,23 @@ export function NearbyProjectDetector({ projects }: NearbyProjectDetectorProps) 
     return R * c;
   };
 
-  // Geocode address to coordinates (simplified - in production use a geocoding API)
+  // Geocode address using Mapbox via backend
   const geocodeAddress = async (address: string): Promise<{ lat: number; lng: number } | null> => {
-    // This is a placeholder - in production, use Google Maps Geocoding API or similar
-    // For now, we'll return null and skip projects without coordinates
-    return null;
+    try {
+      const { data, error } = await supabase.functions.invoke('geocode-address', {
+        body: { address },
+      });
+
+      if (error) {
+        console.error('Geocoding error:', error);
+        return null;
+      }
+
+      return data.coordinates || null;
+    } catch (error) {
+      console.error('Failed to geocode:', error);
+      return null;
+    }
   };
 
   const detectNearbyProjects = async () => {
@@ -58,24 +71,27 @@ export function NearbyProjectDetector({ projects }: NearbyProjectDetectorProps) 
         const { latitude, longitude } = position.coords;
         setUserLocation({ lat: latitude, lng: longitude });
 
-        // Calculate distances for all projects
+        // Calculate distances for all projects with addresses
         const projectsWithDistance = await Promise.all(
-          projects.map(async (project) => {
-            // In production, geocode the project address
-            // For now, we'll use a placeholder
-            const projectCoords = await geocodeAddress(project.address);
-            
-            if (!projectCoords) return null;
+          projects
+            .filter(p => p.address && p.address.trim().length > 0)
+            .map(async (project) => {
+              const projectCoords = await geocodeAddress(project.address);
+              
+              if (!projectCoords) {
+                console.warn(`Failed to geocode project: ${project.name} (${project.address})`);
+                return null;
+              }
 
-            const distance = calculateDistance(
-              latitude,
-              longitude,
-              projectCoords.lat,
-              projectCoords.lng
-            );
+              const distance = calculateDistance(
+                latitude,
+                longitude,
+                projectCoords.lat,
+                projectCoords.lng
+              );
 
-            return { ...project, distance };
-          })
+              return { ...project, distance };
+            })
         );
 
         // Filter out null results and projects more than 5km away
