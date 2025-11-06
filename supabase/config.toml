@@ -4,4 +4,8 @@ project_id = "xmrrcgrhogexlqwylftz"
 verify_jwt = false
 
 [functions.analyze-photo]
-verify_jwt = true
+verify_jwt = false
+
+[functions.transcribe-audio]
+verify_jwt = false
+

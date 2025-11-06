@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { useProjects } from '@/hooks/useProjects';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Loader2, QrCode, WifiOff } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import ProjectOverview from '@/components/project-detail/ProjectOverview';
 import ProjectTeamMembers from '@/components/project-detail/ProjectTeamMembers';
@@ -11,12 +12,16 @@ import ProjectDocuments from '@/components/project-detail/ProjectDocuments';
 import ProjectTimeline from '@/components/project-detail/ProjectTimeline';
 import ProjectActivityLog from '@/components/project-detail/ProjectActivityLog';
 import { QuickCameraButton } from '@/components/photos/QuickCameraButton';
+import { QRScanner } from '@/components/photos/QRScanner';
+import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { projects, loading, updateProject } = useProjects();
   const [project, setProject] = useState(projects.find(p => p.id === id));
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const { queueCount, online } = useOfflineQueue();
 
   useEffect(() => {
     const foundProject = projects.find(p => p.id === id);
@@ -66,6 +71,27 @@ export default function ProjectDetail() {
               {project.project_number}
             </p>
           </div>
+          <div className="flex items-center gap-2">
+            {!online && (
+              <Badge variant="destructive" className="flex items-center gap-1">
+                <WifiOff className="h-3 w-3" />
+                Offline
+              </Badge>
+            )}
+            {queueCount > 0 && (
+              <Badge variant="secondary">
+                {queueCount} queued
+              </Badge>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowQRScanner(true)}
+            >
+              <QrCode className="h-4 w-4 mr-2" />
+              Scan QR
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -103,6 +129,11 @@ export default function ProjectDetail() {
       
       {/* Floating Quick Camera Button */}
       <QuickCameraButton projectId={project.id} onPhotoTaken={() => window.location.reload()} />
+      
+      {/* QR Scanner Modal */}
+      {showQRScanner && (
+        <QRScanner onClose={() => setShowQRScanner(false)} />
+      )}
       </div>
     </>
   );

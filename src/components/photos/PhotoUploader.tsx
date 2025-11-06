@@ -10,8 +10,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Upload, Loader2, X, MapPin } from 'lucide-react';
+import { Camera, Upload, Loader2, X, MapPin, Pencil } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { VoiceNoteRecorder } from './VoiceNoteRecorder';
+import { PhotoAnnotator } from './PhotoAnnotator';
+import { addToQueue, isOnline } from '@/lib/offlineQueue';
+import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 
 interface PhotoUploaderProps {
   projectId: string;
@@ -38,6 +42,7 @@ export function PhotoUploader({ projectId, initialFile, onUploadComplete }: Phot
   const { user } = useAuth();
   const { organization } = useOrganization();
   const { toast } = useToast();
+  const { updateQueueCount } = useOfflineQueue();
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -49,6 +54,7 @@ export function PhotoUploader({ projectId, initialFile, onUploadComplete }: Phot
   const [isAfterPhoto, setIsAfterPhoto] = useState(false);
   const [manualRoomType, setManualRoomType] = useState('Auto-detect');
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showAnnotator, setShowAnnotator] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,6 +102,53 @@ export function PhotoUploader({ projectId, initialFile, onUploadComplete }: Phot
 
   const handleUpload = async () => {
     if (!selectedFile || !user || !organization) return;
+
+    // Check if offline - queue for later
+    if (!isOnline()) {
+      try {
+        await addToQueue({
+          projectId,
+          organizationId: organization.id,
+          uploadedBy: user.id,
+          file: selectedFile,
+          fileName: selectedFile.name,
+          fileSize: selectedFile.size,
+          mimeType: selectedFile.type,
+          caption: caption || undefined,
+          notes: notes || undefined,
+          isBeforePhoto,
+          isAfterPhoto,
+          roomType: manualRoomType !== 'Auto-detect' ? manualRoomType : undefined,
+          locationLat: location?.lat,
+          locationLng: location?.lng,
+        });
+
+        toast({
+          title: 'Photo Queued',
+          description: 'Photo will upload when connection is restored',
+        });
+
+        // Reset form
+        setSelectedFile(null);
+        setPreview(null);
+        setCaption('');
+        setNotes('');
+        setIsBeforePhoto(false);
+        setIsAfterPhoto(false);
+        setLocation(null);
+
+        await updateQueueCount();
+        onUploadComplete?.();
+        return;
+      } catch (error: any) {
+        toast({
+          title: 'Queue Failed',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
 
     setUploading(true);
     setProgress(10);
@@ -320,6 +373,13 @@ export function PhotoUploader({ projectId, initialFile, onUploadComplete }: Phot
 
             <div>
               <Label htmlFor="notes">Notes (Optional)</Label>
+              <div className="flex gap-2 mb-2">
+                <VoiceNoteRecorder
+                  onTranscription={(text) => {
+                    setNotes(prev => prev ? `${prev}\n${text}` : text);
+                  }}
+                />
+              </div>
               <Textarea
                 id="notes"
                 value={notes}
@@ -363,7 +423,14 @@ export function PhotoUploader({ projectId, initialFile, onUploadComplete }: Phot
           <div className="flex gap-2">
             <Button
               variant="outline"
-              className="flex-1"
+              onClick={() => setShowAnnotator(true)}
+              disabled={uploading}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Annotate
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => {
                 setPreview(null);
                 setSelectedFile(null);
@@ -387,6 +454,30 @@ export function PhotoUploader({ projectId, initialFile, onUploadComplete }: Phot
               )}
             </Button>
           </div>
+
+          {/* Annotator Modal */}
+          {showAnnotator && preview && (
+            <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+              <div className="max-w-4xl w-full">
+                <PhotoAnnotator
+                  imageUrl={preview}
+                  onSave={(annotatedBlob) => {
+                    const annotatedFile = new File([annotatedBlob], selectedFile!.name, {
+                      type: 'image/png',
+                    });
+                    setSelectedFile(annotatedFile);
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setPreview(reader.result as string);
+                    };
+                    reader.readAsDataURL(annotatedFile);
+                    setShowAnnotator(false);
+                  }}
+                  onCancel={() => setShowAnnotator(false)}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </Card>
