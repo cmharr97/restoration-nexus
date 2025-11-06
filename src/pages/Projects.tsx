@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useProjects } from '@/hooks/useProjects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import CreateProjectDialog from '@/components/CreateProjectDialog';
 import Navigation from '@/components/Navigation';
 import { Plus, Search, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Projects() {
   const { projects, loading, createProject } = useProjects();
@@ -16,6 +17,15 @@ export default function Projects() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [lossTypeFilter, setLossTypeFilter] = useState<string>('all');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('create')) {
+      setCreateDialogOpen(true);
+    }
+  }, [location.search]);
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
@@ -219,7 +229,12 @@ export default function Projects() {
 
       <CreateProjectDialog
         open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
+        onOpenChange={(open) => {
+          setCreateDialogOpen(open);
+          if (!open) {
+            navigate('/projects', { replace: true });
+          }
+        }}
         onSubmit={async (data) => { await createProject(data as any); }}
       />
       </div>

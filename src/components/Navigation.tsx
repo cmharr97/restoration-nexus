@@ -1,5 +1,5 @@
 import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Plus, Moon, Sun, LogOut } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,9 +28,9 @@ export default function Navigation() {
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const { organization, membership } = useOrganization();
+  const navigate = useNavigate();
 
   const [profile, setProfile] = useState<any>(null);
-
   useEffect(() => {
     if (user) {
       supabase
@@ -85,7 +85,7 @@ export default function Navigation() {
               {organization.name}
             </span>
           )}
-          <Button variant="default" size="sm" className="gap-2 bg-accent hover:bg-accent/90">
+          <Button variant="default" size="sm" className="gap-2 bg-accent hover:bg-accent/90" onClick={() => navigate('/projects?create=1')}>
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Quick Add</span>
           </Button>
