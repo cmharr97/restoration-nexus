@@ -213,7 +213,7 @@ export default function Projects() {
       <CreateProjectDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        onSubmit={createProject}
+        onSubmit={async (data) => { await createProject(data as any); }}
       />
     </div>
   );
