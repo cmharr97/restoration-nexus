@@ -12,12 +12,16 @@ import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
 import { useState } from "react";
 
+import { Repeat } from "lucide-react";
+
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: FileText, label: "AI Scope Generator", path: "/scope-generator" },
   { icon: Users, label: "CRM", path: "/crm" },
   { icon: ClipboardList, label: "Projects", path: "/projects", badge: 24 },
   { icon: Calendar, label: "Schedule", path: "/schedule" },
+  { icon: Repeat, label: "Recurring Jobs", path: "/recurring-jobs" },
+  { icon: BarChart3, label: "Analytics", path: "/analytics" },
   { icon: Droplets, label: "Moisture", path: "/moisture" },
   { icon: Wrench, label: "Equipment", path: "/equipment" },
   { icon: Package, label: "Contents", path: "/contents" },
@@ -25,7 +29,6 @@ const navItems = [
   { icon: Upload, label: "Submittals", path: "/submittals" },
   { icon: DollarSign, label: "Financials", path: "/financials" },
   { icon: UserCog, label: "Subcontractors", path: "/subcontractors" },
-  { icon: BarChart3, label: "Reports", path: "/reports" },
 ];
 
 export default function Navigation() {

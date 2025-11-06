@@ -17,6 +17,8 @@ import OrganizationProfile from "./pages/OrganizationProfile";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import JobsSchedule from "./pages/JobsSchedule";
+import RecurringJobs from "./pages/RecurringJobs";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +85,22 @@ const App = () => (
                   element={
                     <ProtectedRoute requireOrganization>
                       <JobsSchedule />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/recurring-jobs"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <RecurringJobs />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/analytics"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <Analytics />
                     </ProtectedRoute>
                   }
                 />

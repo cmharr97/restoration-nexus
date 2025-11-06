@@ -371,6 +371,139 @@ export type Database = {
           },
         ]
       }
+      recurring_job_instances: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          scheduled_date: string
+          skip_reason: string | null
+          template_id: string
+          was_skipped: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          scheduled_date: string
+          skip_reason?: string | null
+          template_id: string
+          was_skipped?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          scheduled_date?: string
+          skip_reason?: string | null
+          template_id?: string
+          was_skipped?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_job_instances_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_job_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_job_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_job_templates: {
+        Row: {
+          address: string | null
+          assigned_to: string | null
+          auto_skip_conflicts: boolean | null
+          created_at: string
+          created_by: string
+          description: string | null
+          end_date: string | null
+          end_time: string
+          id: string
+          is_active: boolean | null
+          job_type: Database["public"]["Enums"]["job_type"]
+          name: string
+          organization_id: string
+          priority: string | null
+          recurrence_day: number | null
+          recurrence_pattern: string
+          start_date: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          assigned_to?: string | null
+          auto_skip_conflicts?: boolean | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_date?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          job_type: Database["public"]["Enums"]["job_type"]
+          name: string
+          organization_id: string
+          priority?: string | null
+          recurrence_day?: number | null
+          recurrence_pattern: string
+          start_date: string
+          start_time?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          assigned_to?: string | null
+          auto_skip_conflicts?: boolean | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_date?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          job_type?: Database["public"]["Enums"]["job_type"]
+          name?: string
+          organization_id?: string
+          priority?: string | null
+          recurrence_day?: number | null
+          recurrence_pattern?: string
+          start_date?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_job_templates_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_job_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_job_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schedule_assignments: {
         Row: {
           created_at: string
@@ -488,6 +621,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_recurring_jobs: {
+        Args: {
+          p_end_date: string
+          p_start_date: string
+          p_template_id: string
+        }
+        Returns: {
+          generated_date: string
+          skip_reason: string
+          was_skipped: boolean
+        }[]
+      }
       is_organization_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
