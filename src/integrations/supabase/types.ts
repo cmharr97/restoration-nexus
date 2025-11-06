@@ -123,6 +123,7 @@ export type Database = {
           address: string | null
           cost_codes: Json | null
           created_at: string | null
+          created_by: string | null
           default_project_templates: Json | null
           email: string | null
           id: string
@@ -138,6 +139,7 @@ export type Database = {
           address?: string | null
           cost_codes?: Json | null
           created_at?: string | null
+          created_by?: string | null
           default_project_templates?: Json | null
           email?: string | null
           id?: string
@@ -153,6 +155,7 @@ export type Database = {
           address?: string | null
           cost_codes?: Json | null
           created_at?: string | null
+          created_by?: string | null
           default_project_templates?: Json | null
           email?: string | null
           id?: string

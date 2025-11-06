@@ -47,13 +47,14 @@ export default function SetupOrganization() {
     try {
       // Create organization
       const { data: org, error: orgError } = await supabase
-        .from('organizations')
+        .from('organizations' as any)
         .insert({
           name: companyName,
           address: companyAddress || null,
           phone: companyPhone || null,
           email: companyEmail || null,
-        })
+          created_by: user.id,
+        } as any)
         .select()
         .single();
 
@@ -61,14 +62,14 @@ export default function SetupOrganization() {
 
       // Add user as owner
       const { error: memberError } = await supabase
-        .from('organization_members')
+        .from('organization_members' as any)
         .insert({
-          organization_id: org.id,
+          organization_id: (org as any).id,
           user_id: user.id,
           role: 'owner',
           joined_at: new Date().toISOString(),
           is_active: true,
-        });
+        } as any);
 
       if (memberError) throw memberError;
 
