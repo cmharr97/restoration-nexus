@@ -51,13 +51,13 @@ export function useProjects() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('projects')
+        .from('projects' as any)
         .select('*')
         .eq('organization_id', organization.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProjects(data || []);
+      setProjects((data as any) || []);
     } catch (error: any) {
       console.error('Error fetching projects:', error);
       toast({
@@ -79,19 +79,19 @@ export function useProjects() {
 
     try {
       // Generate project number
-      const { data: projectNumber, error: numberError } = await supabase
+      const { data: projectNumber, error: numberError } = await (supabase as any)
         .rpc('generate_project_number');
 
       if (numberError) throw numberError;
 
       const { data, error } = await supabase
-        .from('projects')
+        .from('projects' as any)
         .insert({
           ...projectData,
           organization_id: organization.id,
           project_number: projectNumber,
           created_by: (await supabase.auth.getUser()).data.user?.id,
-        })
+        } as any)
         .select()
         .single();
 
@@ -99,7 +99,7 @@ export function useProjects() {
 
       toast({
         title: 'Project Created',
-        description: `${data.name} has been created successfully`,
+        description: `${(data as any).name} has been created successfully`,
       });
 
       fetchProjects();
@@ -118,8 +118,8 @@ export function useProjects() {
   const updateProject = async (id: string, projectData: Partial<Project>) => {
     try {
       const { data, error } = await supabase
-        .from('projects')
-        .update(projectData)
+        .from('projects' as any)
+        .update(projectData as any)
         .eq('id', id)
         .select()
         .single();
@@ -147,7 +147,7 @@ export function useProjects() {
   const deleteProject = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('projects')
+        .from('projects' as any)
         .delete()
         .eq('id', id);
 

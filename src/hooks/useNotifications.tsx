@@ -26,7 +26,7 @@ export function useNotifications() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -34,8 +34,8 @@ export function useNotifications() {
 
       if (error) throw error;
       
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+      setNotifications((data as any) || []);
+      setUnreadCount((data as any)?.filter((n: any) => !n.is_read).length || 0);
     } catch (error: any) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -74,8 +74,8 @@ export function useNotifications() {
   const markAsRead = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
+        .from('notifications' as any)
+        .update({ is_read: true } as any)
         .eq('id', id);
 
       if (error) throw error;
@@ -94,8 +94,8 @@ export function useNotifications() {
 
     try {
       const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
+        .from('notifications' as any)
+        .update({ is_read: true } as any)
         .eq('user_id', user.id)
         .eq('is_read', false);
 
@@ -113,7 +113,7 @@ export function useNotifications() {
   const deleteNotification = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .delete()
         .eq('id', id);
 
