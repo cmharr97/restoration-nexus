@@ -84,10 +84,19 @@ export function useProjects() {
 
       if (numberError) throw numberError;
 
+      // Convert empty strings to null for date fields
+      const cleanedData = {
+        ...projectData,
+        loss_date: projectData.loss_date || null,
+        start_date: projectData.start_date || null,
+        target_completion_date: projectData.target_completion_date || null,
+        actual_completion_date: projectData.actual_completion_date || null,
+      };
+
       const { data, error } = await supabase
         .from('projects' as any)
         .insert({
-          ...projectData,
+          ...cleanedData,
           organization_id: organization.id,
           project_number: projectNumber,
           created_by: (await supabase.auth.getUser()).data.user?.id,
