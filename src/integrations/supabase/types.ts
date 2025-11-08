@@ -1446,6 +1446,66 @@ export type Database = {
           },
         ]
       }
+      time_entries: {
+        Row: {
+          billable_hours: number | null
+          clock_in: string
+          clock_out: string | null
+          created_at: string
+          hourly_rate: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          project_id: string
+          total_cost: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billable_hours?: number | null
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string
+          hourly_rate?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          project_id: string
+          total_cost?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billable_hours?: number | null
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string
+          hourly_rate?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          project_id?: string
+          total_cost?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_schedules: {
         Row: {
           created_at: string

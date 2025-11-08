@@ -11,6 +11,8 @@ import ProjectTeamMembers from '@/components/project-detail/ProjectTeamMembers';
 import ProjectDocuments from '@/components/project-detail/ProjectDocuments';
 import ProjectTimeline from '@/components/project-detail/ProjectTimeline';
 import ProjectActivityLog from '@/components/project-detail/ProjectActivityLog';
+import TimeTracker from '@/components/project-detail/TimeTracker';
+import ProjectBudgetTracker from '@/components/project-detail/ProjectBudgetTracker';
 import { QuickCameraButton } from '@/components/photos/QuickCameraButton';
 import { QRScanner } from '@/components/photos/QRScanner';
 import { NearbyProjectDetector } from '@/components/photos/NearbyProjectDetector';
@@ -98,12 +100,14 @@ export default function ProjectDetail() {
 
       <div className="pt-40 pb-8 px-6 ml-64">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="time">Time</TabsTrigger>
+            <TabsTrigger value="budget">Budget</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -124,6 +128,17 @@ export default function ProjectDetail() {
 
           <TabsContent value="activity" className="mt-6">
             <ProjectActivityLog projectId={project.id} />
+          </TabsContent>
+
+          <TabsContent value="time" className="mt-6">
+            <TimeTracker projectId={project.id} organizationId={project.organization_id} />
+          </TabsContent>
+
+          <TabsContent value="budget" className="mt-6">
+            <ProjectBudgetTracker 
+              estimatedCost={project.estimated_cost} 
+              actualCost={project.actual_cost}
+            />
           </TabsContent>
         </Tabs>
       </div>
