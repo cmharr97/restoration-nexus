@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, Edit2, Save, X } from 'lucide-react';
 import type { Project } from '@/hooks/useProjects';
+import ProjectMilestones from './ProjectMilestones';
 
 interface ProjectTimelineProps {
   project: Project;
@@ -159,21 +160,7 @@ export default function ProjectTimeline({ project, onUpdate }: ProjectTimelinePr
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Milestones
-          </CardTitle>
-          <CardDescription>Coming soon: Add and track project milestones</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Calendar className="h-12 w-12 mx-auto mb-3 opacity-20" />
-            <p>Milestone tracking will be available soon</p>
-          </div>
-        </CardContent>
-      </Card>
+      <ProjectMilestones projectId={project.id} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { BatchPhotoUploader } from '@/components/photos/BatchPhotoUploader';
 import { PhotoAlbums } from '@/components/photos/PhotoAlbums';
 import { BeforeAfterSlider } from '@/components/photos/BeforeAfterSlider';
 import { useQuery } from '@tanstack/react-query';
+import DocumentUploader from './DocumentUploader';
 
 interface ProjectDocumentsProps {
   projectId: string;
@@ -200,17 +201,13 @@ export default function ProjectDocuments({ projectId }: ProjectDocumentsProps) {
           </div>
         </TabsContent>
 
-      <TabsContent value="documents">
+      <TabsContent value="documents" className="space-y-6">
+        <DocumentUploader projectId={projectId} onUploadComplete={fetchDocuments} />
+        
         <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Documents</CardTitle>
-          <CardDescription>Project files and attachments</CardDescription>
-        </div>
-        <Button>
-          <Upload className="h-4 w-4 mr-2" />
-          Upload
-        </Button>
+      <CardHeader>
+        <CardTitle>Documents</CardTitle>
+        <CardDescription>Project files and attachments</CardDescription>
       </CardHeader>
       <CardContent>
         {loading ? (

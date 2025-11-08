@@ -69,12 +69,21 @@ export function PersonalDashboard() {
 
       setAssignedJobs((jobsData as any) || []);
 
-      // Mock notifications (replace with real notification system later)
-      setNotifications([
-        { id: 1, type: 'task', message: 'Update job photos for Water Damage - 123 Main St', priority: 'high' },
-        { id: 2, type: 'schedule', message: 'New job assigned for tomorrow', priority: 'medium' },
-        { id: 3, type: 'update', message: 'Equipment check-in reminder', priority: 'low' },
-      ]);
+      // Fetch real notifications
+      const { data: notificationsData } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_read', false)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      setNotifications((notificationsData || []).map((n: any) => ({
+        id: n.id,
+        type: n.type,
+        message: n.message,
+        priority: n.type === 'error' ? 'high' : n.type === 'warning' ? 'medium' : 'low',
+      })));
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
