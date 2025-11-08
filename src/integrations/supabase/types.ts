@@ -355,6 +355,210 @@ export type Database = {
           },
         ]
       }
+      contents_inventory: {
+        Row: {
+          category: string | null
+          condition: Database["public"]["Enums"]["item_condition"]
+          created_at: string | null
+          customer_signature: string | null
+          description: string | null
+          estimated_value: number | null
+          id: string
+          item_name: string
+          notes: string | null
+          organization_id: string
+          packed_date: string | null
+          photos: string[] | null
+          project_id: string
+          qr_code: string | null
+          returned_date: string | null
+          room: string | null
+          specialist_id: string
+          storage_location: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          condition: Database["public"]["Enums"]["item_condition"]
+          created_at?: string | null
+          customer_signature?: string | null
+          description?: string | null
+          estimated_value?: number | null
+          id?: string
+          item_name: string
+          notes?: string | null
+          organization_id: string
+          packed_date?: string | null
+          photos?: string[] | null
+          project_id: string
+          qr_code?: string | null
+          returned_date?: string | null
+          room?: string | null
+          specialist_id: string
+          storage_location?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          condition?: Database["public"]["Enums"]["item_condition"]
+          created_at?: string | null
+          customer_signature?: string | null
+          description?: string | null
+          estimated_value?: number | null
+          id?: string
+          item_name?: string
+          notes?: string | null
+          organization_id?: string
+          packed_date?: string | null
+          photos?: string[] | null
+          project_id?: string
+          qr_code?: string | null
+          returned_date?: string | null
+          room?: string | null
+          specialist_id?: string
+          storage_location?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contents_inventory_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contents_inventory_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_portals: {
+        Row: {
+          access_token: string
+          created_at: string | null
+          customer_email: string
+          customer_name: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          last_accessed: string | null
+          organization_id: string
+          project_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string | null
+          customer_email: string
+          customer_name?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_accessed?: string | null
+          organization_id: string
+          project_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_accessed?: string | null
+          organization_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_portals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_portals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipment: {
+        Row: {
+          assigned_to: string | null
+          created_at: string | null
+          current_project_id: string | null
+          equipment_type: Database["public"]["Enums"]["equipment_type"]
+          hourly_rate: number | null
+          id: string
+          last_maintenance: string | null
+          model: string | null
+          next_maintenance: string | null
+          notes: string | null
+          organization_id: string
+          runtime_hours: number | null
+          serial_number: string
+          status: Database["public"]["Enums"]["equipment_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string | null
+          current_project_id?: string | null
+          equipment_type: Database["public"]["Enums"]["equipment_type"]
+          hourly_rate?: number | null
+          id?: string
+          last_maintenance?: string | null
+          model?: string | null
+          next_maintenance?: string | null
+          notes?: string | null
+          organization_id: string
+          runtime_hours?: number | null
+          serial_number: string
+          status?: Database["public"]["Enums"]["equipment_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string | null
+          current_project_id?: string | null
+          equipment_type?: Database["public"]["Enums"]["equipment_type"]
+          hourly_rate?: number | null
+          id?: string
+          last_maintenance?: string | null
+          model?: string | null
+          next_maintenance?: string | null
+          notes?: string | null
+          organization_id?: string
+          runtime_hours?: number | null
+          serial_number?: string
+          status?: Database["public"]["Enums"]["equipment_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_current_project_id_fkey"
+            columns: ["current_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -431,6 +635,81 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          category: string | null
+          created_at: string | null
+          created_by: string
+          description: string | null
+          documents: string[] | null
+          due_date: string | null
+          id: string
+          invoice_number: string | null
+          notes: string | null
+          organization_id: string
+          paid_date: string | null
+          payment_status: string | null
+          project_id: string
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          approved_by?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          documents?: string[] | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          organization_id: string
+          paid_date?: string | null
+          payment_status?: string | null
+          project_id: string
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          documents?: string[] | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          organization_id?: string
+          paid_date?: string | null
+          payment_status?: string | null
+          project_id?: string
+          transaction_type?: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -564,6 +843,159 @@ export type Database = {
             columns: ["board_id"]
             isOneToOne: false
             referencedRelation: "kanban_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          address: string | null
+          ai_damage_estimate: number | null
+          ai_triage_score: number | null
+          assigned_to: string | null
+          converted_project_id: string | null
+          created_at: string | null
+          created_by: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          damage_type: Database["public"]["Enums"]["damage_type"]
+          id: string
+          initial_photos: string[] | null
+          notes: string | null
+          organization_id: string
+          source: string | null
+          status: Database["public"]["Enums"]["lead_status"] | null
+          updated_at: string | null
+          urgency: Database["public"]["Enums"]["urgency_level"] | null
+        }
+        Insert: {
+          address?: string | null
+          ai_damage_estimate?: number | null
+          ai_triage_score?: number | null
+          assigned_to?: string | null
+          converted_project_id?: string | null
+          created_at?: string | null
+          created_by: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          damage_type: Database["public"]["Enums"]["damage_type"]
+          id?: string
+          initial_photos?: string[] | null
+          notes?: string | null
+          organization_id: string
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"] | null
+          updated_at?: string | null
+          urgency?: Database["public"]["Enums"]["urgency_level"] | null
+        }
+        Update: {
+          address?: string | null
+          ai_damage_estimate?: number | null
+          ai_triage_score?: number | null
+          assigned_to?: string | null
+          converted_project_id?: string | null
+          created_at?: string | null
+          created_by?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          damage_type?: Database["public"]["Enums"]["damage_type"]
+          id?: string
+          initial_photos?: string[] | null
+          notes?: string | null
+          organization_id?: string
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"] | null
+          updated_at?: string | null
+          urgency?: Database["public"]["Enums"]["urgency_level"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_converted_project_id_fkey"
+            columns: ["converted_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mitigation_logs: {
+        Row: {
+          alert_flags: string[] | null
+          created_at: string | null
+          drying_progress: number | null
+          equipment_deployed: Json | null
+          id: string
+          log_date: string
+          moisture_readings: Json | null
+          notes: string | null
+          organization_id: string
+          photos: string[] | null
+          project_id: string
+          relative_humidity: number | null
+          status: string | null
+          tech_id: string
+          temperature: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          alert_flags?: string[] | null
+          created_at?: string | null
+          drying_progress?: number | null
+          equipment_deployed?: Json | null
+          id?: string
+          log_date: string
+          moisture_readings?: Json | null
+          notes?: string | null
+          organization_id: string
+          photos?: string[] | null
+          project_id: string
+          relative_humidity?: number | null
+          status?: string | null
+          tech_id: string
+          temperature?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          alert_flags?: string[] | null
+          created_at?: string | null
+          drying_progress?: number | null
+          equipment_deployed?: Json | null
+          id?: string
+          log_date?: string
+          moisture_readings?: Json | null
+          notes?: string | null
+          organization_id?: string
+          photos?: string[] | null
+          project_id?: string
+          relative_humidity?: number | null
+          status?: string | null
+          tech_id?: string
+          temperature?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mitigation_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mitigation_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1228,6 +1660,174 @@ export type Database = {
           },
         ]
       }
+      recon_assessments: {
+        Row: {
+          affected_areas: Json | null
+          ai_damage_tags: string[] | null
+          ai_estimate: number | null
+          approved_by: string | null
+          completed_at: string | null
+          created_at: string | null
+          damage_severity: number | null
+          estimated_scope: string | null
+          geolocation: unknown
+          id: string
+          moisture_readings: Json | null
+          notes: string | null
+          organization_id: string
+          photos: string[] | null
+          project_id: string
+          recommended_phases: string[] | null
+          status: string | null
+          tech_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          affected_areas?: Json | null
+          ai_damage_tags?: string[] | null
+          ai_estimate?: number | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          damage_severity?: number | null
+          estimated_scope?: string | null
+          geolocation?: unknown
+          id?: string
+          moisture_readings?: Json | null
+          notes?: string | null
+          organization_id: string
+          photos?: string[] | null
+          project_id: string
+          recommended_phases?: string[] | null
+          status?: string | null
+          tech_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          affected_areas?: Json | null
+          ai_damage_tags?: string[] | null
+          ai_estimate?: number | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          damage_severity?: number | null
+          estimated_scope?: string | null
+          geolocation?: unknown
+          id?: string
+          moisture_readings?: Json | null
+          notes?: string | null
+          organization_id?: string
+          photos?: string[] | null
+          project_id?: string
+          recommended_phases?: string[] | null
+          status?: string | null
+          tech_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recon_assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recon_assessments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reconstruction_phases: {
+        Row: {
+          actual_completion: string | null
+          actual_cost: number | null
+          assigned_subcontractor: string | null
+          budget: number | null
+          change_orders: Json | null
+          created_at: string | null
+          dependencies: string[] | null
+          id: string
+          notes: string | null
+          organization_id: string
+          permit_status: string | null
+          permits_required: boolean | null
+          phase_name: string
+          photos: string[] | null
+          pm_id: string
+          project_id: string
+          punch_list: Json | null
+          start_date: string | null
+          status: string | null
+          target_completion: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          actual_completion?: string | null
+          actual_cost?: number | null
+          assigned_subcontractor?: string | null
+          budget?: number | null
+          change_orders?: Json | null
+          created_at?: string | null
+          dependencies?: string[] | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          permit_status?: string | null
+          permits_required?: boolean | null
+          phase_name: string
+          photos?: string[] | null
+          pm_id: string
+          project_id: string
+          punch_list?: Json | null
+          start_date?: string | null
+          status?: string | null
+          target_completion?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          actual_completion?: string | null
+          actual_cost?: number | null
+          assigned_subcontractor?: string | null
+          budget?: number | null
+          change_orders?: Json | null
+          created_at?: string | null
+          dependencies?: string[] | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          permit_status?: string | null
+          permits_required?: boolean | null
+          phase_name?: string
+          photos?: string[] | null
+          pm_id?: string
+          project_id?: string
+          punch_list?: Json | null
+          start_date?: string | null
+          status?: string | null
+          target_completion?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reconstruction_phases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reconstruction_phases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurring_job_instances: {
         Row: {
           created_at: string
@@ -1586,6 +2186,41 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          organization_id: string
+          permissions: Json | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          permissions?: Json | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          permissions?: Json | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_schedules: {
         Row: {
           created_at: string
@@ -1640,6 +2275,69 @@ export type Database = {
           },
         ]
       }
+      workflow_handoffs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          from_phase: string
+          from_user: string
+          handoff_data: Json | null
+          id: string
+          notes: string | null
+          notification_sent: boolean | null
+          organization_id: string
+          project_id: string
+          status: string | null
+          to_phase: string
+          to_user: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          from_phase: string
+          from_user: string
+          handoff_data?: Json | null
+          id?: string
+          notes?: string | null
+          notification_sent?: boolean | null
+          organization_id: string
+          project_id: string
+          status?: string | null
+          to_phase: string
+          to_user?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          from_phase?: string
+          from_user?: string
+          handoff_data?: Json | null
+          id?: string
+          notes?: string | null
+          notification_sent?: boolean | null
+          organization_id?: string
+          project_id?: string
+          status?: string | null
+          to_phase?: string
+          to_user?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_handoffs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_handoffs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1658,6 +2356,22 @@ export type Database = {
           was_skipped: boolean
         }[]
       }
+      has_any_role: {
+        Args: {
+          _org_id: string
+          _roles: Database["public"]["Enums"]["app_role"][]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _org_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_organization_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -1668,7 +2382,33 @@ export type Database = {
       }
     }
     Enums: {
+      app_role:
+        | "owner"
+        | "office_admin"
+        | "recon_tech"
+        | "mitigation_tech"
+        | "contents_specialist"
+        | "reconstruction_pm"
+        | "field_crew"
+        | "subcontractor"
+      damage_type: "water" | "fire" | "mold" | "storm" | "biohazard" | "other"
+      equipment_status: "available" | "deployed" | "maintenance" | "retired"
+      equipment_type:
+        | "dehumidifier"
+        | "air_mover"
+        | "air_scrubber"
+        | "heater"
+        | "generator"
+        | "other"
+      item_condition:
+        | "excellent"
+        | "good"
+        | "fair"
+        | "damaged"
+        | "total_loss"
+        | "salvage"
       job_type: "mitigation" | "contents" | "reconstruction"
+      lead_status: "new" | "contacted" | "qualified" | "converted" | "lost"
       loss_type: "water" | "fire" | "mold" | "storm" | "other"
       project_stage:
         | "emergency"
@@ -1677,6 +2417,13 @@ export type Database = {
         | "reconstruction"
         | "contents"
         | "closeout"
+      transaction_type:
+        | "estimate"
+        | "invoice"
+        | "payment"
+        | "change_order"
+        | "expense"
+      urgency_level: "low" | "medium" | "high" | "emergency"
       user_role:
         | "owner"
         | "admin"
@@ -1821,7 +2568,36 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: [
+        "owner",
+        "office_admin",
+        "recon_tech",
+        "mitigation_tech",
+        "contents_specialist",
+        "reconstruction_pm",
+        "field_crew",
+        "subcontractor",
+      ],
+      damage_type: ["water", "fire", "mold", "storm", "biohazard", "other"],
+      equipment_status: ["available", "deployed", "maintenance", "retired"],
+      equipment_type: [
+        "dehumidifier",
+        "air_mover",
+        "air_scrubber",
+        "heater",
+        "generator",
+        "other",
+      ],
+      item_condition: [
+        "excellent",
+        "good",
+        "fair",
+        "damaged",
+        "total_loss",
+        "salvage",
+      ],
       job_type: ["mitigation", "contents", "reconstruction"],
+      lead_status: ["new", "contacted", "qualified", "converted", "lost"],
       loss_type: ["water", "fire", "mold", "storm", "other"],
       project_stage: [
         "emergency",
@@ -1831,6 +2607,14 @@ export const Constants = {
         "contents",
         "closeout",
       ],
+      transaction_type: [
+        "estimate",
+        "invoice",
+        "payment",
+        "change_order",
+        "expense",
+      ],
+      urgency_level: ["low", "medium", "high", "emergency"],
       user_role: [
         "owner",
         "admin",

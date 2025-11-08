@@ -37,6 +37,11 @@ export type Project = {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  job_type: 'recon' | 'mitigation' | 'contents' | 'reconstruction' | 'emergency' | 'inspection';
+  assigned_to: string | null;
+  description: string | null;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  end_date: string | null;
 };
 
 export function useProjects() {

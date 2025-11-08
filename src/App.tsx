@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { OrganizationProvider } from "@/hooks/useOrganization";
+import { UserRoleProvider } from "@/hooks/useUserRole";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -25,6 +26,7 @@ import Tasks from "./pages/Tasks";
 import CheckIns from "./pages/CheckIns";
 import Boards from "./pages/Boards";
 import Activity from "./pages/Activity";
+import Leads from "./pages/Leads";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,7 +40,8 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <OrganizationProvider>
-              <Routes>
+              <UserRoleProvider>
+                <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/setup-organization" element={<SetupOrganization />} />
