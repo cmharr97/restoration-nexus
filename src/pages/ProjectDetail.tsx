@@ -13,6 +13,8 @@ import ProjectTimeline from '@/components/project-detail/ProjectTimeline';
 import ProjectActivityLog from '@/components/project-detail/ProjectActivityLog';
 import TimeTracker from '@/components/project-detail/TimeTracker';
 import ProjectBudgetTracker from '@/components/project-detail/ProjectBudgetTracker';
+import ExpenseSubmission from '@/components/project-detail/ExpenseSubmission';
+import ExpenseList from '@/components/project-detail/ExpenseList';
 import { QuickCameraButton } from '@/components/photos/QuickCameraButton';
 import { QRScanner } from '@/components/photos/QRScanner';
 import { NearbyProjectDetector } from '@/components/photos/NearbyProjectDetector';
@@ -100,7 +102,7 @@ export default function ProjectDetail() {
 
       <div className="pt-40 pb-8 px-6 ml-64">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -108,6 +110,7 @@ export default function ProjectDetail() {
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="time">Time</TabsTrigger>
             <TabsTrigger value="budget">Budget</TabsTrigger>
+            <TabsTrigger value="expenses">Expenses</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -139,6 +142,13 @@ export default function ProjectDetail() {
               estimatedCost={project.estimated_cost} 
               actualCost={project.actual_cost}
             />
+          </TabsContent>
+
+          <TabsContent value="expenses" className="mt-6">
+            <div className="space-y-6">
+              <ExpenseSubmission projectId={project.id} />
+              <ExpenseList projectId={project.id} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
