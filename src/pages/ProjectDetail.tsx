@@ -15,6 +15,7 @@ import TimeTracker from '@/components/project-detail/TimeTracker';
 import ProjectBudgetTracker from '@/components/project-detail/ProjectBudgetTracker';
 import ExpenseSubmission from '@/components/project-detail/ExpenseSubmission';
 import ExpenseList from '@/components/project-detail/ExpenseList';
+import { WorkflowHandoffs } from '@/components/project-detail/WorkflowHandoffs';
 import { QuickCameraButton } from '@/components/photos/QuickCameraButton';
 import { QRScanner } from '@/components/photos/QRScanner';
 import { NearbyProjectDetector } from '@/components/photos/NearbyProjectDetector';
@@ -102,11 +103,12 @@ export default function ProjectDetail() {
 
       <div className="pt-40 pb-8 px-6 ml-64">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="workflow">Workflow</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="time">Time</TabsTrigger>
             <TabsTrigger value="budget">Budget</TabsTrigger>
@@ -127,6 +129,10 @@ export default function ProjectDetail() {
 
           <TabsContent value="timeline" className="mt-6">
             <ProjectTimeline project={project} onUpdate={updateProject} />
+          </TabsContent>
+
+          <TabsContent value="workflow" className="mt-6">
+            <WorkflowHandoffs projectId={project.id} organizationId={project.organization_id} />
           </TabsContent>
 
           <TabsContent value="activity" className="mt-6">

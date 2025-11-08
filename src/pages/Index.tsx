@@ -3,6 +3,10 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { PersonalDashboard } from "@/components/dashboard/PersonalDashboard";
 import { OwnerDashboard } from "@/components/dashboards/OwnerDashboard";
 import { ReconTechDashboard } from "@/components/dashboards/ReconTechDashboard";
+import { MitigationTechDashboard } from "@/components/dashboards/MitigationTechDashboard";
+import { ContentsSpecialistDashboard } from "@/components/dashboards/ContentsSpecialistDashboard";
+import { FieldCrewDashboard } from "@/components/dashboards/FieldCrewDashboard";
+import { OfficeAdminDashboard } from "@/components/dashboards/OfficeAdminDashboard";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Loader2 } from "lucide-react";
 
@@ -23,8 +27,16 @@ export default function Index() {
     switch (userRole.role) {
       case 'owner':
         return <OwnerDashboard />;
+      case 'office_admin':
+        return <OfficeAdminDashboard />;
       case 'recon_tech':
         return <ReconTechDashboard />;
+      case 'mitigation_tech':
+        return <MitigationTechDashboard />;
+      case 'contents_specialist':
+        return <ContentsSpecialistDashboard />;
+      case 'field_crew':
+        return <FieldCrewDashboard />;
       default:
         return <PersonalDashboard />;
     }

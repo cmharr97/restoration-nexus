@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Plus, Moon, Sun, LogOut, MessageSquare, MessageCircle, CheckSquare, Kanban as KanbanIcon, Activity as ActivityIcon, Repeat } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Plus, Moon, Sun, LogOut, MessageSquare, MessageCircle, CheckSquare, Kanban as KanbanIcon, Activity as ActivityIcon, Repeat, Target } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useTheme } from "@/components/ThemeProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useUserRole, getRoleDisplayName } from "@/hooks/useUserRole";
 import NotificationBell from "@/components/NotificationBell";
 import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
@@ -15,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: Target, label: "Leads", path: "/leads" },
   { icon: ClipboardList, label: "Projects", path: "/projects" },
   { icon: Calendar, label: "Schedule", path: "/schedule" },
   { icon: MessageSquare, label: "Announcements", path: "/announcements" },
@@ -32,6 +34,7 @@ export default function Navigation() {
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const { organization, membership } = useOrganization();
+  const { userRole } = useUserRole();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState<any>(null);
@@ -116,9 +119,14 @@ export default function Navigation() {
                   <p className="font-medium">
                     {profile?.full_name || user?.email}
                   </p>
+                  {userRole && (
+                    <Badge className="mt-1 bg-accent text-accent-foreground">
+                      {getRoleDisplayName(userRole.role)}
+                    </Badge>
+                  )}
                   {membership && (
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {membership.role.replace(/_/g, ' ')}
+                    <p className="text-xs text-muted-foreground capitalize mt-1">
+                      Org: {membership.role.replace(/_/g, ' ')}
                     </p>
                   )}
                 </div>

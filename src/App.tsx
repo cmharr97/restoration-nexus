@@ -161,9 +161,18 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/leads"
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <Leads />
+                    </ProtectedRoute>
+                  }
+                />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </UserRoleProvider>
             </OrganizationProvider>
           </AuthProvider>
         </BrowserRouter>
