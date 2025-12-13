@@ -492,13 +492,13 @@ function RecurringJobsContent() {
                     <Label htmlFor="assigned_to">Assign To</Label>
                     <Select
                       value={formData.assigned_to}
-                      onValueChange={(value) => setFormData({ ...formData, assigned_to: value })}
+                      onValueChange={(value) => setFormData({ ...formData, assigned_to: value === 'unassigned' ? '' : value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Unassigned (optional)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Unassigned</SelectItem>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
                         {members.map((member: any) => (
                           <SelectItem key={member.id} value={member.profiles.id}>
                             {member.profiles.full_name || member.profiles.email}
