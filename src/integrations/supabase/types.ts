@@ -2380,6 +2380,15 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      validate_portal_token: {
+        Args: { token: string }
+        Returns: {
+          customer_name: string
+          is_valid: boolean
+          portal_id: string
+          project_id: string
+        }[]
+      }
     }
     Enums: {
       app_role:
