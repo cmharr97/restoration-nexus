@@ -88,9 +88,17 @@ export default function Navigation() {
 
         <div className="flex items-center gap-2">
           {organization && (
-            <span className="text-sm text-muted-foreground hidden lg:block">
-              {organization.name}
-            </span>
+            organization.logo_url ? (
+              <img 
+                src={organization.logo_url} 
+                alt={organization.name} 
+                className="h-8 w-auto max-w-[120px] object-contain hidden lg:block"
+              />
+            ) : (
+              <span className="text-sm text-muted-foreground hidden lg:block">
+                {organization.name}
+              </span>
+            )
           )}
           <Button variant="default" size="sm" className="gap-2 bg-accent hover:bg-accent/90" onClick={() => navigate('/projects?create=1')}>
             <Plus className="h-4 w-4" />
