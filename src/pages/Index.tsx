@@ -1,5 +1,4 @@
 import Navigation from "@/components/Navigation";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import { PersonalDashboard } from "@/components/dashboard/PersonalDashboard";
 import { OwnerDashboard } from "@/components/dashboards/OwnerDashboard";
 import { ReconTechDashboard } from "@/components/dashboards/ReconTechDashboard";
@@ -43,15 +42,13 @@ export default function Index() {
   };
 
   return (
-    <ProtectedRoute requireOrganization>
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <main className="lg:ml-64 mt-16 p-6">
-          <div className="max-w-7xl mx-auto">
-            {renderDashboard()}
-          </div>
-        </main>
-      </div>
-    </ProtectedRoute>
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <main className="lg:ml-64 mt-16 p-6">
+        <div className="max-w-7xl mx-auto">
+          {renderDashboard()}
+        </div>
+      </main>
+    </div>
   );
 }

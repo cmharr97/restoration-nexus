@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -16,9 +16,24 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const { signUp, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Redirect to setup-organization once user is authenticated after signup
+  useEffect(() => {
+    if (signupSuccess && !authLoading && user) {
+      navigate('/setup-organization');
+    }
+  }, [signupSuccess, authLoading, user, navigate]);
+
+  // If user is already logged in, redirect to home
+  useEffect(() => {
+    if (!authLoading && user && !signupSuccess) {
+      navigate('/');
+    }
+  }, [user, authLoading, signupSuccess, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,17 +76,28 @@ export default function Signup() {
           description: error.message,
           variant: 'destructive',
         });
+        setLoading(false);
       } else {
         toast({
           title: 'Account Created',
-          description: 'Welcome to ReCon Pro! Please set up your organization.',
+          description: 'Welcome to ReCon Pro! Setting up your account...',
         });
-        navigate('/setup-organization');
+        // Mark signup as successful - useEffect will handle redirect when auth state updates
+        setSignupSuccess(true);
       }
-    } finally {
+    } catch (err) {
       setLoading(false);
     }
   };
+
+  // Show loading if checking auth status
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -137,12 +163,12 @@ export default function Signup() {
             <Button
               type="submit"
               className="w-full bg-accent hover:bg-accent/90"
-              disabled={loading}
+              disabled={loading || signupSuccess}
             >
-              {loading ? (
+              {loading || signupSuccess ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
+                  {signupSuccess ? 'Setting up...' : 'Creating Account...'}
                 </>
               ) : (
                 'Create Account'

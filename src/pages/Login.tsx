@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -14,9 +14,16 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/');
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,17 +48,27 @@ export default function Login() {
           description: error.message,
           variant: 'destructive',
         });
+        setLoading(false);
       } else {
         toast({
           title: 'Welcome Back',
           description: 'Successfully logged in',
         });
-        navigate('/');
+        // Navigation will happen via the useEffect when user state updates
       }
-    } finally {
+    } catch (err) {
       setLoading(false);
     }
   };
+
+  // Show loading if checking auth status
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

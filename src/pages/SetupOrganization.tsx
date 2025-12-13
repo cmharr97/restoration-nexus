@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,9 +22,24 @@ export default function SetupOrganization() {
   const [companyEmail, setCompanyEmail] = useState('');
   const [selectedRole, setSelectedRole] = useState<AppRole>('owner');
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { organization, loading: orgLoading, refetchOrganization } = useOrganization();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Redirect if not logged in (after auth check completes)
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/login');
+    }
+  }, [user, authLoading, navigate]);
+
+  // Redirect if user already has an organization
+  useEffect(() => {
+    if (!orgLoading && organization) {
+      navigate('/');
+    }
+  }, [organization, orgLoading, navigate]);
 
   const roles: AppRole[] = [
     'owner',
@@ -63,9 +79,10 @@ export default function SetupOrganization() {
     if (!user) {
       toast({
         title: 'Authentication Error',
-        description: 'You must be logged in to create an organization',
+        description: 'Please log in to create an organization',
         variant: 'destructive',
       });
+      navigate('/login');
       return;
     }
 
@@ -74,41 +91,41 @@ export default function SetupOrganization() {
     try {
       // Create organization
       const { data: org, error: orgError } = await supabase
-        .from('organizations' as any)
+        .from('organizations')
         .insert({
           name: companyName,
           address: companyAddress || null,
           phone: companyPhone || null,
           email: companyEmail || null,
           created_by: user.id,
-        } as any)
+        })
         .select()
         .single();
 
       if (orgError) throw orgError;
 
-      // Add user as organization member
+      // Add user as organization member with owner role
       const { error: memberError } = await supabase
-        .from('organization_members' as any)
+        .from('organization_members')
         .insert({
-          organization_id: (org as any).id,
+          organization_id: org.id,
           user_id: user.id,
-          role: selectedRole === 'owner' ? 'owner' : 'coordinator',
+          role: 'owner', // Always owner for the person creating the org
           joined_at: new Date().toISOString(),
           is_active: true,
-        } as any);
+        });
 
       if (memberError) throw memberError;
 
-      // Add user role
+      // Add user role based on selection (for dashboard customization)
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({
           user_id: user.id,
-          organization_id: (org as any).id,
+          organization_id: org.id,
           role: selectedRole,
           permissions: {},
-        } as any);
+        });
 
       if (roleError) throw roleError;
 
@@ -117,6 +134,8 @@ export default function SetupOrganization() {
         description: `${companyName} has been set up successfully`,
       });
 
+      // Refetch organization data before navigating
+      await refetchOrganization();
       navigate('/');
     } catch (error: any) {
       console.error('Error creating organization:', error);
@@ -129,6 +148,20 @@ export default function SetupOrganization() {
       setLoading(false);
     }
   };
+
+  // Show loading while checking auth
+  if (authLoading || orgLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
+
+  // Don't render if not logged in (will redirect via useEffect)
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
