@@ -15,18 +15,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  { icon: Target, label: "Leads", path: "/leads" },
+  { icon: LayoutDashboard, label: "Home", path: "/" },
   { icon: ClipboardList, label: "Projects", path: "/projects" },
   { icon: Calendar, label: "Schedule", path: "/schedule" },
-  { icon: MessageSquare, label: "Announcements", path: "/announcements" },
-  { icon: MessageCircle, label: "Team Chat", path: "/team-chat" },
-  { icon: CheckSquare, label: "Tasks", path: "/tasks" },
-  { icon: KanbanIcon, label: "Boards", path: "/boards" },
-  { icon: FileText, label: "Check-ins", path: "/check-ins" },
-  { icon: ActivityIcon, label: "Activity", path: "/activity" },
-  { icon: Repeat, label: "Recurring Jobs", path: "/recurring-jobs" },
-  { icon: BarChart3, label: "Analytics", path: "/analytics" },
 ];
 
 export default function Navigation() {
