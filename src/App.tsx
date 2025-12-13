@@ -75,7 +75,11 @@ const App = () => (
                 />
                 <Route
                   path="/settings"
-                  element={<OrganizationSettings />}
+                  element={
+                    <ProtectedRoute requireOrganization>
+                      <OrganizationSettings />
+                    </ProtectedRoute>
+                  }
                 />
                 <Route
                   path="/organization/profile"
