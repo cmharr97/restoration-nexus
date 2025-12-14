@@ -17,6 +17,7 @@ export type Database = {
       ai_scopes: {
         Row: {
           created_at: string | null
+          created_by: string | null
           description: string
           detailed_scope: string | null
           estimated_cost: number | null
@@ -37,6 +38,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           description: string
           detailed_scope?: string | null
           estimated_cost?: number | null
@@ -57,6 +59,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           description?: string
           detailed_scope?: string | null
           estimated_cost?: number | null

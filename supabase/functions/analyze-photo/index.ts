@@ -12,10 +12,34 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create client with user's auth context
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
     );
+
+    // Verify the user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Auth error:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', user.id);
 
     const { imageUrl, projectId } = await req.json();
     
@@ -28,12 +52,20 @@ serve(async (req) => {
 
     console.log('Analyzing photo for project:', projectId);
 
-    // Get project details for context
-    const { data: project } = await supabase
+    // Get project details - RLS will ensure user has access
+    const { data: project, error: projectError } = await supabase
       .from('projects')
-      .select('name, job_type, address')
+      .select('name, job_type, address, organization_id')
       .eq('id', projectId)
       .single();
+
+    if (projectError || !project) {
+      console.error('Project access denied or not found:', projectError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Project not found or access denied' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -145,7 +177,7 @@ Return ONLY a JSON object with these exact keys: category, room_type, damage_typ
     }
 
     const analysisData = await analysisResponse.json();
-    console.log('AI response:', JSON.stringify(analysisData, null, 2));
+    console.log('AI response received for user:', user.id);
 
     // Extract tool call result
     const toolCall = analysisData.choices?.[0]?.message?.tool_calls?.[0];

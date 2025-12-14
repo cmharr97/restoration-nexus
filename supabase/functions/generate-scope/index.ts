@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,6 +12,35 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create client with user's auth context
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Verify the user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Auth error:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', user.id);
+
     const { projectName, projectAddress, lossType, description, imageUrls } = await req.json();
     
     if (!projectName || !description || !lossType) {
@@ -79,7 +109,7 @@ Generate a comprehensive reconstruction scope with material list and O&P justifi
       content: userContent
     });
 
-    console.log('Calling Lovable AI Gateway...');
+    console.log('Calling Lovable AI Gateway for user:', user.id);
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -119,7 +149,7 @@ Generate a comprehensive reconstruction scope with material list and O&P justifi
       throw new Error('No content in AI response');
     }
 
-    console.log('AI Response received');
+    console.log('AI Response received for user:', user.id);
 
     // Parse the JSON response from AI
     let parsedScope;
@@ -143,6 +173,7 @@ Generate a comprehensive reconstruction scope with material list and O&P justifi
         estimatedCost: parsedScope.estimatedCost,
         estimatedDurationDays: parsedScope.estimatedDurationDays,
         tradesRequired: parsedScope.tradesRequired || [],
+        userId: user.id, // Include user ID for client-side storage
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
