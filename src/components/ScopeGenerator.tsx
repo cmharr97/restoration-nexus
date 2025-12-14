@@ -85,7 +85,7 @@ export default function ScopeGenerator() {
 
       setGeneratedScope(data);
 
-      // Save to database
+      // Save to database with user ID from the response
       const { error: dbError } = await supabase.from('ai_scopes').insert({
         project_name: projectName,
         project_address: projectAddress,
@@ -98,6 +98,7 @@ export default function ScopeGenerator() {
         estimated_cost: data.estimatedCost,
         estimated_duration_days: data.estimatedDurationDays,
         trades_required: data.tradesRequired,
+        created_by: data.userId, // Set from authenticated user
       });
 
       if (dbError) console.error('Failed to save scope:', dbError);
