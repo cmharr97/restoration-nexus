@@ -26,6 +26,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onSubmit }: Cr
     loss_date: '',
     loss_description: '',
     status: 'lead' as const,
+    job_type: 'mitigation' as const,
     owner_name: '',
     owner_email: '',
     owner_phone: '',
@@ -53,6 +54,7 @@ export default function CreateProjectDialog({ open, onOpenChange, onSubmit }: Cr
         loss_date: '',
         loss_description: '',
         status: 'lead',
+        job_type: 'mitigation',
         owner_name: '',
         owner_email: '',
         owner_phone: '',
@@ -111,6 +113,23 @@ export default function CreateProjectDialog({ open, onOpenChange, onSubmit }: Cr
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="on_hold">On Hold</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="job_type">Job Type *</Label>
+                <Select value={formData.job_type} onValueChange={(value: any) => setFormData({ ...formData, job_type: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recon">Recon</SelectItem>
+                    <SelectItem value="mitigation">Mitigation</SelectItem>
+                    <SelectItem value="contents">Contents</SelectItem>
+                    <SelectItem value="reconstruction">Reconstruction</SelectItem>
+                    <SelectItem value="emergency">Emergency</SelectItem>
+                    <SelectItem value="inspection">Inspection</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
