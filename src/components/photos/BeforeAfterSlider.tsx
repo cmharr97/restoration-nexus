@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, ArrowLeftRight } from 'lucide-react';
+import { X, ArrowLeftRight, Loader2 } from 'lucide-react';
+import { getSignedUrl } from '@/hooks/useSignedUrl';
 
 interface Photo {
   id: string;
@@ -20,10 +21,34 @@ export function BeforeAfterSlider({ beforePhotos, afterPhotos, onClose }: Before
   const [sliderPosition, setSliderPosition] = useState(50);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [beforeUrl, setBeforeUrl] = useState<string>('');
+  const [afterUrl, setAfterUrl] = useState<string>('');
+  const [loadingUrls, setLoadingUrls] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const currentBefore = beforePhotos[currentIndex];
   const currentAfter = afterPhotos[currentIndex];
+
+  // Fetch signed URLs when photos change
+  useEffect(() => {
+    const fetchUrls = async () => {
+      if (!currentBefore || !currentAfter) {
+        setLoadingUrls(false);
+        return;
+      }
+
+      setLoadingUrls(true);
+      const [beforeSignedUrl, afterSignedUrl] = await Promise.all([
+        getSignedUrl('project-photos', currentBefore.file_path),
+        getSignedUrl('project-photos', currentAfter.file_path),
+      ]);
+      setBeforeUrl(beforeSignedUrl || '');
+      setAfterUrl(afterSignedUrl || '');
+      setLoadingUrls(false);
+    };
+
+    fetchUrls();
+  }, [currentBefore, currentAfter]);
 
   const handleMouseDown = () => setIsDragging(true);
   const handleMouseUp = () => setIsDragging(false);
@@ -96,42 +121,50 @@ export function BeforeAfterSlider({ beforePhotos, afterPhotos, onClose }: Before
           onTouchMove={handleTouchMove}
           onTouchEnd={handleMouseUp}
         >
-          {/* After Image (right side) */}
-          <img
-            src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/project-photos/${currentAfter.file_path}`}
-            alt="After"
-            className="absolute inset-0 w-full h-full object-contain"
-          />
-
-          {/* Before Image (left side, clipped) */}
-          <div
-            className="absolute inset-0 overflow-hidden"
-            style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-          >
-            <img
-              src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/project-photos/${currentBefore.file_path}`}
-              alt="Before"
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-          </div>
-
-          {/* Slider Handle */}
-          <div
-            className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize"
-            style={{ left: `${sliderPosition}%` }}
-          >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center">
-              <ArrowLeftRight className="h-4 w-4 text-black" />
+          {loadingUrls ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-white" />
             </div>
-          </div>
+          ) : (
+            <>
+              {/* After Image (right side) */}
+              <img
+                src={afterUrl}
+                alt="After"
+                className="absolute inset-0 w-full h-full object-contain"
+              />
 
-          {/* Labels */}
-          <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm font-semibold">
-            BEFORE
-          </div>
-          <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded text-sm font-semibold">
-            AFTER
-          </div>
+              {/* Before Image (left side, clipped) */}
+              <div
+                className="absolute inset-0 overflow-hidden"
+                style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+              >
+                <img
+                  src={beforeUrl}
+                  alt="Before"
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Slider Handle */}
+              <div
+                className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize"
+                style={{ left: `${sliderPosition}%` }}
+              >
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center">
+                  <ArrowLeftRight className="h-4 w-4 text-black" />
+                </div>
+              </div>
+
+              {/* Labels */}
+              <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm font-semibold">
+                BEFORE
+              </div>
+              <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded text-sm font-semibold">
+                AFTER
+              </div>
+            </>
+          )}
         </div>
 
         {/* Navigation */}

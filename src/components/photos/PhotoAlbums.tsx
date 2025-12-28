@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Home, AlertTriangle } from 'lucide-react';
+import { Calendar, Home, AlertTriangle, Loader2 } from 'lucide-react';
+import { getSignedUrl } from '@/hooks/useSignedUrl';
 
 interface Photo {
   id: string;
@@ -17,6 +18,45 @@ interface Photo {
 interface PhotoAlbumsProps {
   photos: Photo[];
   onPhotoClick: (photo: Photo) => void;
+}
+
+// Component for a single photo with signed URL
+function PhotoThumbnail({ photo, onPhotoClick }: { photo: Photo; onPhotoClick: (photo: Photo) => void }) {
+  const [url, setUrl] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUrl = async () => {
+      const signedUrl = await getSignedUrl('project-photos', photo.file_path);
+      setUrl(signedUrl || '');
+      setLoading(false);
+    };
+    fetchUrl();
+  }, [photo.file_path]);
+
+  return (
+    <div
+      className="relative aspect-square cursor-pointer group overflow-hidden rounded-lg border border-border hover:border-primary transition-colors"
+      onClick={() => onPhotoClick(photo)}
+    >
+      {loading ? (
+        <div className="w-full h-full flex items-center justify-center bg-muted">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <img
+          src={url}
+          alt={photo.caption || 'Project photo'}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+        />
+      )}
+      {photo.caption && (
+        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2 truncate">
+          {photo.caption}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function PhotoAlbums({ photos, onPhotoClick }: PhotoAlbumsProps) {
@@ -60,22 +100,7 @@ export function PhotoAlbums({ photos, onPhotoClick }: PhotoAlbumsProps) {
   const renderPhotoGrid = (albumPhotos: Photo[]) => (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {albumPhotos.map((photo) => (
-        <div
-          key={photo.id}
-          className="relative aspect-square cursor-pointer group overflow-hidden rounded-lg border border-border hover:border-primary transition-colors"
-          onClick={() => onPhotoClick(photo)}
-        >
-          <img
-            src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/project-photos/${photo.file_path}`}
-            alt={photo.caption || 'Project photo'}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-          />
-          {photo.caption && (
-            <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2 truncate">
-              {photo.caption}
-            </div>
-          )}
-        </div>
+        <PhotoThumbnail key={photo.id} photo={photo} onPhotoClick={onPhotoClick} />
       ))}
     </div>
   );

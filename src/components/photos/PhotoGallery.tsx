@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,12 +6,77 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Search, Filter, Download, Trash2, MapPin, Calendar, User } from 'lucide-react';
+import { Loader2, Search, Download, Trash2, MapPin, Calendar, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { getSignedUrl } from '@/hooks/useSignedUrl';
 
 interface PhotoGalleryProps {
   projectId: string;
+}
+
+// Component for a single photo thumbnail with signed URL
+function PhotoCard({ 
+  photo, 
+  onClick, 
+  getCategoryColor 
+}: { 
+  photo: any; 
+  onClick: () => void; 
+  getCategoryColor: (category: string) => string;
+}) {
+  const [url, setUrl] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUrl = async () => {
+      const signedUrl = await getSignedUrl('project-photos', photo.file_path);
+      setUrl(signedUrl || '');
+      setLoading(false);
+    };
+    fetchUrl();
+  }, [photo.file_path]);
+
+  return (
+    <Card
+      className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={onClick}
+    >
+      <div className="aspect-square relative">
+        {loading ? (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <img
+            src={url}
+            alt={photo.caption || 'Project photo'}
+            className="w-full h-full object-cover"
+          />
+        )}
+        {photo.ai_category && (
+          <Badge className={`absolute top-2 left-2 ${getCategoryColor(photo.ai_category)}`}>
+            {photo.ai_category}
+          </Badge>
+        )}
+        {(photo.is_before_photo || photo.is_after_photo) && (
+          <Badge className="absolute top-2 right-2 bg-accent">
+            {photo.is_before_photo ? 'Before' : 'After'}
+          </Badge>
+        )}
+      </div>
+      <CardContent className="p-3">
+        <p className="text-sm font-medium truncate">
+          {photo.caption || photo.file_name}
+        </p>
+        {photo.ai_room_type && (
+          <p className="text-xs text-muted-foreground capitalize">
+            {photo.ai_room_type}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 export function PhotoGallery({ projectId }: PhotoGalleryProps) {
@@ -20,6 +85,8 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
   const [filteredPhotos, setFilteredPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
+  const [selectedPhotoUrl, setSelectedPhotoUrl] = useState<string>('');
+  const [loadingPhotoUrl, setLoadingPhotoUrl] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [roomFilter, setRoomFilter] = useState('all');
@@ -31,6 +98,21 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
   useEffect(() => {
     filterPhotos();
   }, [photos, searchQuery, categoryFilter, roomFilter]);
+
+  // Fetch signed URL when a photo is selected
+  useEffect(() => {
+    if (selectedPhoto) {
+      const fetchUrl = async () => {
+        setLoadingPhotoUrl(true);
+        const url = await getSignedUrl('project-photos', selectedPhoto.file_path);
+        setSelectedPhotoUrl(url || '');
+        setLoadingPhotoUrl(false);
+      };
+      fetchUrl();
+    } else {
+      setSelectedPhotoUrl('');
+    }
+  }, [selectedPhoto]);
 
   const fetchPhotos = async () => {
     try {
@@ -85,13 +167,6 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
     setFilteredPhotos(filtered);
   };
 
-  const getPhotoUrl = (filePath: string) => {
-    const { data } = supabase.storage
-      .from('project-photos')
-      .getPublicUrl(filePath);
-    return data.publicUrl;
-  };
-
   const handleDelete = async (photoId: string, filePath: string) => {
     if (!confirm('Are you sure you want to delete this photo?')) return;
 
@@ -125,17 +200,28 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
     }
   };
 
-  const handleDownload = (photo: any) => {
-    const url = getPhotoUrl(photo.file_path);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = photo.file_name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async (photo: any) => {
+    try {
+      const url = await getSignedUrl('project-photos', photo.file_path);
+      if (!url) {
+        throw new Error('Failed to get download URL');
+      }
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = photo.file_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error: any) {
+      toast({
+        title: 'Download Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
   };
 
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = useCallback((category: string) => {
     const colors: Record<string, string> = {
       damage: 'bg-red-500/10 text-red-500',
       before: 'bg-blue-500/10 text-blue-500',
@@ -145,7 +231,7 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
       documentation: 'bg-gray-500/10 text-gray-500',
     };
     return colors[category] || 'bg-gray-500/10 text-gray-500';
-  };
+  }, []);
 
   const uniqueCategories = Array.from(new Set(photos.map(p => p.ai_category).filter(Boolean)));
   const uniqueRooms = Array.from(new Set(photos.map(p => p.ai_room_type).filter(Boolean)));
@@ -249,39 +335,12 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredPhotos.map((photo) => (
-            <Card
+            <PhotoCard
               key={photo.id}
-              className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+              photo={photo}
               onClick={() => setSelectedPhoto(photo)}
-            >
-              <div className="aspect-square relative">
-                <img
-                  src={getPhotoUrl(photo.file_path)}
-                  alt={photo.caption || 'Project photo'}
-                  className="w-full h-full object-cover"
-                />
-                {photo.ai_category && (
-                  <Badge className={`absolute top-2 left-2 ${getCategoryColor(photo.ai_category)}`}>
-                    {photo.ai_category}
-                  </Badge>
-                )}
-                {(photo.is_before_photo || photo.is_after_photo) && (
-                  <Badge className="absolute top-2 right-2 bg-accent">
-                    {photo.is_before_photo ? 'Before' : 'After'}
-                  </Badge>
-                )}
-              </div>
-              <CardContent className="p-3">
-                <p className="text-sm font-medium truncate">
-                  {photo.caption || photo.file_name}
-                </p>
-                {photo.ai_room_type && (
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {photo.ai_room_type}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+              getCategoryColor={getCategoryColor}
+            />
           ))}
         </div>
       )}
@@ -296,11 +355,17 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
               </DialogHeader>
 
               <div className="space-y-4">
-                <img
-                  src={getPhotoUrl(selectedPhoto.file_path)}
-                  alt={selectedPhoto.caption || 'Project photo'}
-                  className="w-full rounded-lg"
-                />
+                {loadingPhotoUrl ? (
+                  <div className="w-full h-64 flex items-center justify-center bg-muted rounded-lg">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <img
+                    src={selectedPhotoUrl}
+                    alt={selectedPhoto.caption || 'Project photo'}
+                    className="w-full rounded-lg"
+                  />
+                )}
 
                 {/* AI Analysis */}
                 {selectedPhoto.ai_description && (
