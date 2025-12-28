@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ interface ProjectCampfireProps {
 
 export function ProjectCampfire({ projectId, projectName }: ProjectCampfireProps) {
   const { user } = useAuth();
+  const { organization } = useOrganization();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,12 +45,15 @@ export function ProjectCampfire({ projectId, projectName }: ProjectCampfireProps
   // Find or create channel for this project
   useEffect(() => {
     const initChannel = async () => {
-      if (!user) return;
+      if (!user || !organization) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        // Check if channel exists for this project
         const channelName = `project-${projectId}`;
         
+        // Check if channel exists
         const { data: existingChannel } = await supabase
           .from('chat_channels')
           .select('id')
@@ -57,10 +62,50 @@ export function ProjectCampfire({ projectId, projectName }: ProjectCampfireProps
 
         if (existingChannel) {
           setChannelId(existingChannel.id);
+          
+          // Ensure current user is a member
+          const { data: membership } = await supabase
+            .from('chat_channel_members')
+            .select('id')
+            .eq('channel_id', existingChannel.id)
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (!membership) {
+            await supabase
+              .from('chat_channel_members')
+              .insert({
+                channel_id: existingChannel.id,
+                user_id: user.id
+              });
+          }
         } else {
-          // Create channel - would need organization_id
-          // For now, just show empty state
-          setChannelId(null);
+          // Create channel for this project
+          const { data: newChannel, error: createError } = await supabase
+            .from('chat_channels')
+            .insert({
+              name: channelName,
+              description: `Campfire for ${projectName}`,
+              organization_id: organization.id,
+              created_by: user.id,
+              is_direct_message: false
+            })
+            .select('id')
+            .single();
+
+          if (createError) throw createError;
+
+          if (newChannel) {
+            setChannelId(newChannel.id);
+            
+            // Add creator as member
+            await supabase
+              .from('chat_channel_members')
+              .insert({
+                channel_id: newChannel.id,
+                user_id: user.id
+              });
+          }
         }
       } catch (error) {
         console.error('Error initializing channel:', error);
@@ -70,7 +115,7 @@ export function ProjectCampfire({ projectId, projectName }: ProjectCampfireProps
     };
 
     initChannel();
-  }, [projectId, user]);
+  }, [projectId, projectName, user, organization]);
 
   // Fetch messages when channel is set
   useEffect(() => {
@@ -163,89 +208,75 @@ export function ProjectCampfire({ projectId, projectName }: ProjectCampfireProps
 
       {/* Chat Area */}
       <Card className="h-[500px] flex flex-col">
-        {!channelId ? (
-          <CardContent className="flex-1 flex items-center justify-center text-center">
-            <div>
-              <Flame className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="font-semibold mb-2">Campfire not started</h3>
-              <p className="text-muted-foreground text-sm">
-                Start chatting with your team in real-time
-              </p>
-            </div>
-          </CardContent>
-        ) : (
-          <>
-            {/* Messages */}
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-center">
-                  <div>
-                    <Flame className="h-12 w-12 mx-auto mb-4 text-accent animate-pulse" />
-                    <p className="text-muted-foreground">
-                      🔥 The campfire is warm and ready. Say hello!
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                messages.map((msg) => {
-                  const isOwn = msg.user_id === user?.id;
-                  return (
-                    <div 
-                      key={msg.id}
-                      className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
-                    >
-                      <Avatar className="h-8 w-8 flex-shrink-0">
-                        <AvatarFallback className={isOwn ? 'bg-accent text-accent-foreground' : 'bg-secondary'}>
-                          {msg.profiles?.full_name?.[0] || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className={`max-w-[70%] ${isOwn ? 'text-right' : ''}`}>
-                        <div className="text-xs text-muted-foreground mb-1">
-                          {msg.profiles?.full_name || 'Unknown'}
-                        </div>
-                        <div className={`inline-block px-4 py-2 rounded-2xl ${
-                          isOwn 
-                            ? 'bg-accent text-accent-foreground rounded-tr-sm' 
-                            : 'bg-muted rounded-tl-sm'
-                        }`}>
-                          {msg.content}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-              <div ref={messagesEndRef} />
-            </CardContent>
-
-            {/* Input */}
-            <div className="p-4 border-t border-border">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                  disabled={sending}
-                />
-                <Button 
-                  className="bg-accent hover:bg-accent/90"
-                  onClick={sendMessage}
-                  disabled={sending || !newMessage.trim()}
-                >
-                  {sending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
+        {/* Messages */}
+        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-center">
+              <div>
+                <Flame className="h-12 w-12 mx-auto mb-4 text-accent animate-pulse" />
+                <p className="text-muted-foreground">
+                  🔥 The campfire is warm and ready. Say hello!
+                </p>
               </div>
             </div>
-          </>
-        )}
+          ) : (
+            messages.map((msg) => {
+              const isOwn = msg.user_id === user?.id;
+              return (
+                <div 
+                  key={msg.id}
+                  className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
+                >
+                  <Avatar className="h-8 w-8 flex-shrink-0">
+                    <AvatarFallback className={isOwn ? 'bg-accent text-accent-foreground' : 'bg-secondary'}>
+                      {msg.profiles?.full_name?.[0] || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className={`max-w-[70%] ${isOwn ? 'text-right' : ''}`}>
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {msg.profiles?.full_name || 'Unknown'}
+                    </div>
+                    <div className={`inline-block px-4 py-2 rounded-2xl ${
+                      isOwn 
+                        ? 'bg-accent text-accent-foreground rounded-tr-sm' 
+                        : 'bg-muted rounded-tl-sm'
+                    }`}>
+                      {msg.content}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+          <div ref={messagesEndRef} />
+        </CardContent>
+
+        {/* Input */}
+        <div className="p-4 border-t border-border">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              disabled={sending}
+            />
+            <Button 
+              className="bg-accent hover:bg-accent/90"
+              onClick={sendMessage}
+              disabled={sending || !newMessage.trim()}
+            >
+              {sending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
       </Card>
     </div>
   );
