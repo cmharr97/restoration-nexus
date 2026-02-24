@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, Calendar, ClipboardList, Droplets, Wrench, Package, FileQuestion, Upload, DollarSign, UserCog, BarChart3, Settings, Menu, Search, Plus, Moon, Sun, LogOut, MessageSquare, MessageCircle, CheckSquare, Kanban as KanbanIcon, Activity as ActivityIcon, Repeat, Target } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Calendar, Target, Settings, Menu, Search, Plus, Moon, Sun, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +15,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Home", path: "/" },
-  { icon: ClipboardList, label: "Projects", path: "/projects" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: Target, label: "Leads", path: "/leads" },
+  { icon: ClipboardList, label: "Jobs", path: "/projects" },
   { icon: Calendar, label: "Schedule", path: "/schedule" },
 ];
 
@@ -71,7 +72,7 @@ export default function Navigation() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="⌘K to search projects, claims, equipment..."
+              placeholder="Search jobs, claims, customers..."
               className="pl-10 bg-secondary/50"
             />
           </div>
@@ -93,7 +94,7 @@ export default function Navigation() {
           )}
           <Button variant="default" size="sm" className="gap-2 bg-accent hover:bg-accent/90" onClick={() => navigate('/projects?create=1')}>
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Quick Add</span>
+            <span className="hidden sm:inline">New Job</span>
           </Button>
           <Button
             variant="ghost"
@@ -134,7 +135,7 @@ export default function Navigation() {
               <DropdownMenuItem asChild>
                 <Link to="/organization/profile" className="cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
-                  Organization Profile
+                  Company Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

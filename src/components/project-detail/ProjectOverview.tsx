@@ -58,7 +58,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Project Information</CardTitle>
+          <CardTitle>Job Information</CardTitle>
           {!editing ? (
             <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
               <Edit2 className="h-4 w-4 mr-2" />
@@ -80,7 +80,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>Project Name</Label>
+              <Label>Job Name</Label>
               {editing ? (
                 <Input
                   value={formData.name}
@@ -92,7 +92,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
             </div>
 
             <div>
-              <Label>Status</Label>
+              <Label>Job Status</Label>
               {editing ? (
                 <Select
                   value={formData.status}
@@ -102,9 +102,9 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="lead">Lead</SelectItem>
-                    <SelectItem value="opportunity">Opportunity</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="lead">New Lead</SelectItem>
+                    <SelectItem value="opportunity">Pending Approval</SelectItem>
+                    <SelectItem value="active">In Progress</SelectItem>
                     <SelectItem value="on_hold">On Hold</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -128,11 +128,11 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="water">Water</SelectItem>
-                    <SelectItem value="fire">Fire</SelectItem>
-                    <SelectItem value="mold">Mold</SelectItem>
-                    <SelectItem value="storm">Storm</SelectItem>
-                    <SelectItem value="reconstruction">Reconstruction</SelectItem>
+                    <SelectItem value="water">Water Damage</SelectItem>
+                    <SelectItem value="fire">Fire / Smoke Damage</SelectItem>
+                    <SelectItem value="mold">Mold Remediation</SelectItem>
+                    <SelectItem value="storm">Storm / Wind Damage</SelectItem>
+                    <SelectItem value="reconstruction">Reconstruction Only</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
@@ -160,7 +160,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
           </div>
 
           <div>
-            <Label>Address</Label>
+            <Label>Loss Location</Label>
             {editing ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
                 <Input
@@ -194,7 +194,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
           </div>
 
           <div>
-            <Label>Description</Label>
+            <Label>Loss Description</Label>
             {editing ? (
               <Textarea
                 value={formData.loss_description || ''}
@@ -208,7 +208,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>Estimated Cost</Label>
+              <Label>Estimated Job Value</Label>
               {editing ? (
                 <Input
                   type="number"
@@ -223,7 +223,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
             </div>
 
             <div>
-              <Label>Actual Cost</Label>
+              <Label>Actual Cost to Date</Label>
               {editing ? (
                 <Input
                   type="number"
@@ -242,7 +242,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
 
       <Card>
         <CardHeader>
-          <CardTitle>Insurance Information</CardTitle>
+          <CardTitle>Insurance & Claims</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -341,7 +341,7 @@ export default function ProjectOverview({ project, onUpdate }: ProjectOverviewPr
 
       <Card>
         <CardHeader>
-          <CardTitle>Property Owner</CardTitle>
+          <CardTitle>Customer / Insured</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
