@@ -15,11 +15,7 @@ import { CheckSquare, Plus, Trash2, Loader2, ListTodo } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Tasks() {
-  return (
-    <ProtectedRoute requireOrganization>
-      <TasksContent />
-    </ProtectedRoute>
-  );
+  return <TasksContent />;
 }
 
 function TasksContent() {

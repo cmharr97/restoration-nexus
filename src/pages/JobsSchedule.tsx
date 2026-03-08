@@ -24,11 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function JobsSchedule() {
-  return (
-    <ProtectedRoute requireOrganization>
-      <JobsScheduleContent />
-    </ProtectedRoute>
-  );
+  return <JobsScheduleContent />;
 }
 
 function JobsScheduleContent() {

@@ -14,11 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function OrganizationSettings() {
-  return (
-    <ProtectedRoute requireOrganization requiredRoles={['owner', 'admin']}>
-      <OrganizationSettingsContent />
-    </ProtectedRoute>
-  );
+  return <OrganizationSettingsContent />;
 }
 
 function OrganizationSettingsContent() {

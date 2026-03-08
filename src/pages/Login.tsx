@@ -1,136 +1,93 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import logoLight from '@/assets/logo-light.png';
-import logoDark from '@/assets/logo-dark.png';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
+  const { user, loading: authLoading, signIn } = useAuth();
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (!authLoading && user) {
-      navigate('/');
-    }
-  }, [user, authLoading, navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please enter both email and password',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        toast({
-          title: 'Login Failed',
-          description: error.message,
-          variant: 'destructive',
-        });
-        setLoading(false);
-      } else {
-        toast({
-          title: 'Welcome Back',
-          description: 'Successfully logged in',
-        });
-        // Navigation will happen via the useEffect when user state updates
-      }
-    } catch (err) {
-      setLoading(false);
-    }
-  };
-
-  // Show loading if checking auth status
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
 
+  if (user) return <Navigate to="/" replace />;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    if (error) {
+      toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
+    }
+    setLoading(false);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-6">
-            <img src={logoLight} alt="ReCon Pro" className="h-48 w-auto dark:hidden" />
-            <img src={logoDark} alt="ReCon Pro" className="h-48 w-auto hidden dark:block" />
+    <div className="min-h-screen bg-background flex">
+      {/* Left - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-card border-r border-border flex-col justify-between p-12">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+            <span className="font-headline text-lg font-bold text-primary-foreground">R</span>
           </div>
-          <CardTitle className="text-2xl font-headline">Welcome to ReCon Pro</CardTitle>
-          <CardDescription>Sign in to your account to continue</CardDescription>
-        </CardHeader>
-        <CardContent>
+          <span className="font-headline text-2xl font-bold tracking-tight">ReCon Pro</span>
+        </div>
+        <div className="space-y-6">
+          <h1 className="font-headline text-4xl font-bold leading-tight">
+            Restoration<br />Operations.<br />
+            <span className="text-primary">Simplified.</span>
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-md">
+            Manage every job from lead intake to final payment. Built for restoration professionals who demand control.
+          </p>
+        </div>
+        <div className="text-xs text-muted-foreground">© {new Date().getFullYear()} ReCon Pro</div>
+      </div>
+
+      {/* Right - Form */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-sm space-y-8">
+          <div className="lg:hidden flex items-center gap-3 justify-center mb-4">
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+              <span className="font-headline text-lg font-bold text-primary-foreground">R</span>
+            </div>
+            <span className="font-headline text-2xl font-bold tracking-tight">ReCon Pro</span>
+          </div>
+          <div className="text-center lg:text-left">
+            <h2 className="font-headline text-xl font-bold">Sign in to your account</h2>
+            <p className="text-sm text-muted-foreground mt-1">Enter your credentials to access the platform</p>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <Label htmlFor="email" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Email</Label>
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com" required className="h-10" />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <Label htmlFor="password" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Password</Label>
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="h-10" />
             </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-accent hover:bg-accent/90"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing In...
-                </>
-              ) : (
-                'Sign In'
-              )}
+            <Button type="submit" className="w-full h-10 font-semibold" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign In'}
             </Button>
-
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
-              <Link to="/signup" className="text-accent hover:underline font-medium">
-                Sign up
-              </Link>
-            </div>
           </form>
-        </CardContent>
-      </Card>
+          <p className="text-center text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-primary hover:underline font-medium">Create one</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
