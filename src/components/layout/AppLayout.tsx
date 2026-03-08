@@ -18,7 +18,9 @@ import {
   LayoutDashboard, Target, Briefcase, Calendar, CheckSquare,
   Droplets, Hammer, FileText, Receipt, Wrench, BarChart3,
   Settings, Search, Menu, X, LogOut, Sun, Moon,
-  PanelLeftClose, PanelLeftOpen, ChevronDown, Building2, User
+  PanelLeftClose, PanelLeftOpen, Users, Truck, Building2,
+  MessageSquare, Shield, DollarSign, FolderOpen, Zap,
+  UserCheck, HandCoins, ClipboardList, Package
 } from 'lucide-react';
 
 const navSections = [
@@ -30,6 +32,7 @@ const navSections = [
       { icon: Briefcase, label: 'Jobs', path: '/jobs' },
       { icon: Calendar, label: 'Calendar', path: '/calendar' },
       { icon: CheckSquare, label: 'Tasks', path: '/tasks' },
+      { icon: Building2, label: 'Customers', path: '/customers' },
     ]
   },
   {
@@ -38,19 +41,24 @@ const navSections = [
       { icon: Droplets, label: 'Mitigation', path: '/mitigation' },
       { icon: Hammer, label: 'Reconstruction', path: '/reconstruction' },
       { icon: Wrench, label: 'Equipment', path: '/equipment' },
+      { icon: Truck, label: 'Subcontractors', path: '/subcontractors' },
     ]
   },
   {
     label: 'FINANCIAL',
     items: [
       { icon: FileText, label: 'Estimates', path: '/estimates' },
+      { icon: ClipboardList, label: 'Supplements', path: '/supplements' },
       { icon: Receipt, label: 'Invoices', path: '/invoices' },
+      { icon: DollarSign, label: 'Payments', path: '/payments' },
     ]
   },
   {
     label: 'ADMIN',
     items: [
+      { icon: Users, label: 'Team', path: '/team' },
       { icon: BarChart3, label: 'Reports', path: '/reports' },
+      { icon: Zap, label: 'Automations', path: '/automations' },
       { icon: Settings, label: 'Settings', path: '/settings' },
     ]
   },
@@ -90,25 +98,41 @@ export default function AppLayout() {
       {/* Logo */}
       <div className="h-14 flex items-center px-4 border-b border-sidebar-border shrink-0">
         {!collapsed ? (
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-              <span className="font-headline text-sm font-bold text-primary-foreground">R</span>
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="font-headline text-sm font-extrabold text-primary-foreground tracking-tight">R</span>
             </div>
-            <span className="font-headline text-base font-bold tracking-tight">ReCon Pro</span>
+            <div>
+              <span className="font-headline text-sm font-extrabold tracking-tight">ReCon</span>
+              <span className="font-headline text-[9px] font-bold text-primary ml-0.5 tracking-[0.15em]">PRO</span>
+            </div>
           </div>
         ) : (
-          <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center mx-auto">
-            <span className="font-headline text-sm font-bold text-primary-foreground">R</span>
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center mx-auto">
+            <span className="font-headline text-sm font-extrabold text-primary-foreground">R</span>
           </div>
         )}
       </div>
 
+      {/* Role Badge */}
+      {!collapsed && userRole && (
+        <div className="mx-3 mt-3 mb-1 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Shield className="h-3 w-3 text-primary" />
+            <div>
+              <div className="text-[10px] font-bold text-primary tracking-wide">{getRoleDisplayName(userRole.role)}</div>
+              <div className="text-[10px] text-muted-foreground">{profile?.full_name || user?.email}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2">
+      <nav className="flex-1 overflow-y-auto py-2 px-2">
         {navSections.map(section => (
-          <div key={section.label} className="mb-5">
+          <div key={section.label} className="mb-4">
             {!collapsed && (
-              <div className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <div className="px-2.5 mb-1.5 section-label">
                 {section.label}
               </div>
             )}
@@ -119,11 +143,9 @@ export default function AppLayout() {
                   to={item.path}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-md text-[13px] font-medium transition-colors",
-                    collapsed ? "justify-center p-2.5" : "px-2.5 py-2",
-                    isActive(item.path)
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    "nav-item",
+                    collapsed && "justify-center p-2.5",
+                    isActive(item.path) ? "nav-item-active" : "nav-item-inactive"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
@@ -136,7 +158,7 @@ export default function AppLayout() {
         ))}
       </nav>
 
-      {/* Collapse toggle (desktop only) */}
+      {/* Collapse toggle */}
       <div className="hidden lg:block p-2 border-t border-sidebar-border shrink-0">
         <Button
           variant="ghost"
@@ -201,7 +223,6 @@ export default function AppLayout() {
           </div>
 
           <div className="flex items-center gap-1.5 ml-auto">
-            {/* Org name */}
             {organization && (
               <span className="text-xs text-muted-foreground hidden md:block mr-2">
                 {organization.name}
@@ -224,7 +245,7 @@ export default function AppLayout() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                  <div className="h-7 w-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground flex items-center justify-center text-xs font-bold">
                     {getUserInitials()}
                   </div>
                 </Button>
@@ -241,14 +262,12 @@ export default function AppLayout() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/settings" className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
+                    <Settings className="mr-2 h-4 w-4" /> Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+                  <LogOut className="mr-2 h-4 w-4" /> Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

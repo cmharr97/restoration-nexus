@@ -23,6 +23,12 @@ import EstimatesPage from "./pages/EstimatesPage";
 import InvoicesPage from "./pages/InvoicesPage";
 import ReportsPage from "./pages/ReportsPage";
 import OrganizationSettings from "./pages/OrganizationSettings";
+import CustomersPage from "./pages/CustomersPage";
+import TeamPage from "./pages/TeamPage";
+import SubcontractorsPage from "./pages/SubcontractorsPage";
+import SupplementsPage from "./pages/SupplementsPage";
+import PaymentsPage from "./pages/PaymentsPage";
+import AutomationsPage from "./pages/AutomationsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,12 +58,18 @@ const App = () => (
             <Route path="jobs/:id" element={<JobDetail />} />
             <Route path="calendar" element={<JobsSchedule />} />
             <Route path="tasks" element={<Tasks />} />
+            <Route path="customers" element={<CustomersPage />} />
             <Route path="mitigation" element={<MitigationPage />} />
             <Route path="reconstruction" element={<ReconstructionPage />} />
             <Route path="equipment" element={<EquipmentPage />} />
+            <Route path="subcontractors" element={<SubcontractorsPage />} />
             <Route path="estimates" element={<EstimatesPage />} />
+            <Route path="supplements" element={<SupplementsPage />} />
             <Route path="invoices" element={<InvoicesPage />} />
+            <Route path="payments" element={<PaymentsPage />} />
+            <Route path="team" element={<TeamPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="automations" element={<AutomationsPage />} />
             <Route path="settings" element={<OrganizationSettings />} />
           </Route>
 
