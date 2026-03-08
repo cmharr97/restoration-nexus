@@ -2,31 +2,27 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { AuthProvider } from "@/hooks/useAuth";
-import { OrganizationProvider } from "@/hooks/useOrganization";
-import { UserRoleProvider } from "@/hooks/useUserRole";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
+import AppLayout from "@/components/layout/AppLayout";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SetupOrganization from "./pages/SetupOrganization";
-import ScopeGeneratorPage from "./pages/ScopeGeneratorPage";
-import OrganizationSettings from "./pages/OrganizationSettings";
-import OrganizationProfile from "./pages/OrganizationProfile";
-import Projects from "./pages/Projects";
-import ProjectDetail from "./pages/ProjectDetail";
-import JobsSchedule from "./pages/JobsSchedule";
-import RecurringJobs from "./pages/RecurringJobs";
-import Analytics from "./pages/Analytics";
-import Announcements from "./pages/Announcements";
-import TeamChat from "./pages/TeamChat";
-import Tasks from "./pages/Tasks";
-import CheckIns from "./pages/CheckIns";
-import Boards from "./pages/Boards";
-import Activity from "./pages/Activity";
+import Dashboard from "./pages/Index";
+import Jobs from "./pages/Jobs";
+import JobDetail from "./pages/JobDetail";
 import Leads from "./pages/Leads";
+import JobsSchedule from "./pages/JobsSchedule";
+import Tasks from "./pages/Tasks";
+import MitigationPage from "./pages/MitigationPage";
+import ReconstructionPage from "./pages/ReconstructionPage";
+import EquipmentPage from "./pages/EquipmentPage";
+import EstimatesPage from "./pages/EstimatesPage";
+import InvoicesPage from "./pages/InvoicesPage";
+import ReportsPage from "./pages/ReportsPage";
+import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,140 +34,35 @@ const App = () => (
         <Toaster />
         <Sonner />
         <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/setup-organization" element={<SetupOrganization />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <Index />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/scope-generator"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <ScopeGeneratorPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <Projects />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:id"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <ProjectDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <OrganizationSettings />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/organization/profile"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <OrganizationProfile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/schedule"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <JobsSchedule />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/recurring-jobs"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <RecurringJobs />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/analytics"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <Analytics />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/announcements"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <Announcements />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/team-chat"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <TeamChat />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/boards"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <Boards />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/activity"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <Activity />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tasks"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <Tasks />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/check-ins"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <CheckIns />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/leads"
-                  element={
-                    <ProtectedRoute requireOrganization>
-                      <Leads />
-                    </ProtectedRoute>
-                  }
-                />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/setup-organization" element={<SetupOrganization />} />
+
+          {/* Redirect old paths */}
+          <Route path="/projects" element={<Navigate to="/jobs" replace />} />
+          <Route path="/projects/:id" element={<Navigate to="/jobs/:id" replace />} />
+          <Route path="/schedule" element={<Navigate to="/calendar" replace />} />
+
+          {/* Protected routes with app layout */}
+          <Route element={<ProtectedRoute requireOrganization><AppLayout /></ProtectedRoute>}>
+            <Route index element={<Dashboard />} />
+            <Route path="leads" element={<Leads />} />
+            <Route path="jobs" element={<Jobs />} />
+            <Route path="jobs/:id" element={<JobDetail />} />
+            <Route path="calendar" element={<JobsSchedule />} />
+            <Route path="tasks" element={<Tasks />} />
+            <Route path="mitigation" element={<MitigationPage />} />
+            <Route path="reconstruction" element={<ReconstructionPage />} />
+            <Route path="equipment" element={<EquipmentPage />} />
+            <Route path="estimates" element={<EstimatesPage />} />
+            <Route path="invoices" element={<InvoicesPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="settings" element={<OrganizationSettings />} />
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
